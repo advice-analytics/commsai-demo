@@ -1,0 +1,251 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+@font-face {
+  font-family: 'Lexend';
+  src: url('Lexend-VariableFont_wght.ttf') format('truetype');
+  /* Add other font formats if needed */
+  font-weight: normal;
+  font-style: normal;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+  font-family: 'Lexend', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  line-height: 1.6;
+  font-size: 18px;
+  color: black;
+  background: white; /* Set background color to white */
+}
+
+/* Header */
+.bg-black {
+  position: relative;
+  background-color: white; /* Set your desired background color */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add shadow for a raised effect */
+  border-bottom: 2px solid transparent; /* Set a transparent border to reserve space for the gradient */
+  border-image: linear-gradient(to right, white, #144E74); /* Gradient border */
+  border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+}
+
+/* Sticky Header */
+.sticky-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  background-color: white; /* Set your desired background color */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add shadow for a raised effect */
+  border-bottom: 2px solid transparent; /* Set a transparent border to reserve space for the gradient */
+  border-image: linear-gradient(to right, white, #144E74); /* Gradient border */
+  border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+}
+
+/* Footer */
+#App\:Footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: white; /* Set your desired background color */
+  padding: 10px; /* Adjust padding as needed */
+  box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.1); /* Optional: Add shadow for visual effect */
+  border-top: 2px solid transparent; /* Set a transparent border to reserve space for the gradient */
+  border-image: linear-gradient(to right, white, #144E74); /* Gradient border */
+  border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+}
+
+/* Styling for main-container */
+.main-container {
+  display: flex;
+}
+
+/* Styling for nav-container */
+.nav-container {
+  width: 300px;
+  background-color: white;
+  border-right: 3px solid #ddd;
+  height: 100vh;
+  overflow-y: auto;
+  cursor: pointer;
+  padding: 10px;
+  color: black;
+}
+
+.nav-container ul {
+  list-style: none;
+  padding: 0;
+}
+
+.nav-container ul li {
+  padding: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-container ul li:hover,
+.nav-container ul li.active {
+  font-weight: bold;
+  color: #144E74;
+}
+
+/* Styling for border line */
+.border-line {
+  width: 3px;
+  height: 100vh;
+  background-color: #ddd;
+}
+
+/* Styling for content-container */
+.content-container {
+  flex: 1; /* Take remaining space */
+  padding: 20px;
+}
+
+/* Styling for advisor-banner */
+.advisor-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #144e74;
+  border-radius: 5px;
+  padding: 20px;
+  color: #fff;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Styling for profile-section */
+.profile-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+/* Styling for profile-picture */
+.profile-picture img {
+  width: 100%;
+  height: auto;
+}
+
+/* Styling for advisor-info */
+.advisor-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 14px;
+}
+
+/* Styling for service-section */
+.service-section {
+  border-top: 2px solid #ddd;
+  padding-top: 20px;
+  width: 100%;
+}
+
+/* Styling for service-category */
+.service-category {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 20px;
+  background-color: #144e74;
+  border-color: #fff;
+  margin: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.service-category:hover {
+  background-color: #000;
+}
+
+.category-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+}
+
+
+/* Styling for username and commsid */
+.username, .commsid {
+  font-size: 12px;
+  margin-top: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.valuePropId {
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.valuePropId:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .main-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .nav-container ul li {
+    display: none;
+  }
+
+  .nav-container {
+    width: 85%;
+    height: auto;
+    overflow: hidden;
+    border-right: none;
+    border-bottom: 3px solid #ddd;
+    padding-bottom: 20px;
+  }
+
+  .content-container {
+    width: 100%;
+    padding: 20px;
+  }
+
+  .advisor-banner {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .advisor-info {
+    align-items: center;
+    text-align: center;
+    align-items: flex-end;
+  }
+
+  .profile-picture img {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+}
+
+
