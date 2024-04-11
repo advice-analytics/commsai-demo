@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 
 interface ServiceCategory {
   name: string;
@@ -28,7 +29,7 @@ const ServiceCategories: React.FC<ServiceCategoriesProps> = ({ categories }) => 
       <div className="service-categories-grid">
         {categories.map(category => (
           <div key={category.name} className="service-category" onClick={() => handleServiceSelection(category.name)}>
-            <img src={`/dark/${category.icon}`} alt={category.name} className="category-icon" />
+            <Image src={`/dark/${category.icon}`} alt={category.name} className="category-icon" />
             <span>{category.name}</span>
           </div>
         ))}

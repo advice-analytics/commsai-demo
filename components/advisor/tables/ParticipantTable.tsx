@@ -1,6 +1,8 @@
 // components/ParticipantTable.tsx
+
 import React from 'react';
-import { Participant } from '@/types/PlanTypes';
+import { Participant } from '@/types/ParticipantTypes'; // Import Participant from ParticipantTypes.ts
+import { sharedTableStyles } from './SharedStyles'; // Import shared table styles
 
 interface ParticipantTableProps {
   participants: Participant[];
@@ -8,70 +10,49 @@ interface ParticipantTableProps {
 }
 
 const ParticipantTable: React.FC<ParticipantTableProps> = ({ participants, onParticipantSelect }) => {
-  const tableContainerStyle: React.CSSProperties = {
-    maxWidth: '800px',
-    margin: '0 auto',
-    padding: '20px',
-    border: '1px solid #ccc',
-    borderRadius: '5px',
+  const getColor = (value: number): string => {
+    if (value >= 80) return 'green';
+    else if (value >= 60) return '#F8C83A';
+    else if (value >= 40) return 'grey';
+    else if (value >= 20) return '#F8632A';
+    else return 'red';
   };
 
-  const tableTitleStyle: React.CSSProperties = {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    marginBottom: '20px',
-    color: '#144e74',
-  };
-
-  const tableStyle: React.CSSProperties = {
-    width: '100%',
-    borderCollapse: 'collapse',
-  };
-
-  const tableHeaderCellStyle: React.CSSProperties = {
-    backgroundColor: '#144e74',
-    color: 'white',
-    textAlign: 'center',
-    padding: '10px',
-    border: '1px solid #ccc',
-  };
-
-  const tableRowStyle: React.CSSProperties = {
-    borderBottom: '1px solid #ccc',
-    cursor: 'pointer',
+  const renderRowStyle = (participant: Participant): React.CSSProperties => {
+    return {
+      ...(parseInt(participant.need, 10) >= 80 && sharedTableStyles.blueRow), // Example logic for high-need participants
+    };
   };
 
   return (
-    <div style={tableContainerStyle} className="table-container">
-      <h2 style={tableTitleStyle} className="table-title">
-        Participant Table
-      </h2>
-      <table style={tableStyle} className="table">
+    <div style={sharedTableStyles.container}>
+      <table style={sharedTableStyles.table}>
         <thead>
-          <tr className="table-header">
-            <th style={tableHeaderCellStyle}>Name</th>
-            <th style={tableHeaderCellStyle}>Age</th>
-            <th style={tableHeaderCellStyle}>Balance</th>
-            <th style={tableHeaderCellStyle}>Need</th>
-            <th style={tableHeaderCellStyle}>Plan</th>
-            <th style={tableHeaderCellStyle}>Employer</th>
+          <tr style={sharedTableStyles.blueRow}>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Balance</th>
+            <th>Need</th>
+            <th>Plan</th>
+            <th>Employer</th>
           </tr>
         </thead>
         <tbody>
           {participants.map((participant) => (
             <tr
               key={participant.id}
-              style={tableRowStyle}
               onClick={() => onParticipantSelect(participant)}
+              style={{ ...sharedTableStyles.tableRow, ...renderRowStyle(participant) }}
+              className="table-row"
             >
-              <td style={{ ...tableHeaderCellStyle, textAlign: 'left', paddingLeft: '10px' }}>{participant.name}</td>
-              <td style={tableHeaderCellStyle}>{participant.age}</td>
-              <td style={tableHeaderCellStyle}>{participant.balance}</td>
-              <td style={{ ...tableHeaderCellStyle, color: parseInt(participant.need, 10) >= 80 ? 'red' : 'black' }}>
+              <td style={sharedTableStyles.cell}>{participant.name}</td>
+              <td style={sharedTableStyles.cell}>{participant.age}</td>
+              <td style={sharedTableStyles.cell}>{participant.balance}</td>
+              <td style={{ ...sharedTableStyles.cell, color: getColor(parseInt(participant.need, 10)) }}>
                 {participant.need}
               </td>
-              <td style={tableHeaderCellStyle}>{participant.plan}</td>
-              <td style={tableHeaderCellStyle}>{participant.employer}</td>
+              <td style={sharedTableStyles.cell}>{participant.plan}</td>
+              <td style={sharedTableStyles.cell}>{participant.employer}</td>
             </tr>
           ))}
         </tbody>

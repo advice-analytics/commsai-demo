@@ -70,7 +70,7 @@ const AdvisorBanner: React.FC = () => {
       <div className='profile-section'>
         <div className='profile-picture' onClick={() => document.getElementById('profile-picture-input')?.click()}>
           {profilePictureUrl ? (
-            <img src={profilePictureUrl} alt="Profile" width={100} height={100} />
+            <Image src={profilePictureUrl} alt="Profile" width={100} height={100} />
           ) : (
             <Image src="/profilephoto.png" alt="Profile Picture" width={100} height={100} priority />
           )}
@@ -92,7 +92,7 @@ const AdvisorBanner: React.FC = () => {
       <div className='service-section'>
         {serviceCategories.map((category, index) => (
           <div key={index} className='service-category'>
-            <img src={`/light/${category.icon}`} alt={category.name} className='category-icon' />
+            <Image src={`/light/${category.icon}`} alt={category.name} className='category-icon' width={24} height={24} />
             <span>{category.name}</span>
           </div>
         ))}

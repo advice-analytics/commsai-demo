@@ -58,11 +58,11 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanSelect }) => {
 
   return (
     <div style={containerStyle}>
-      <h2 style={tableTitleStyle}>Plan Table</h2>
+      <h2 style={tableTitleStyle}>Data Table</h2>
       <table style={tableStyle}>
         <thead>
           <tr style={tableHeaderStyle}>
-            <th>Plan Name</th>
+            <th>Plan</th>
             <th>Assets</th>
             <th>Participants</th>
             <th>Health</th>

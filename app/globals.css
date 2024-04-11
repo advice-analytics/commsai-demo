@@ -207,6 +207,8 @@ html, body {
   text-decoration: underline;
 }
 
+
+
 @media (max-width: 640px) {
   .main-container {
     flex-direction: column;
