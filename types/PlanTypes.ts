@@ -22,6 +22,10 @@ export interface Plan {
     investment: number;
     estate: number;
     other: number;
+    incomeFrom?: number; // Add incomeFrom property
+    incomeTo?: number; // Add incomeTo property
+    balanceFrom?: number; // Add balanceFrom property
+    balanceTo?: number; // 
     clients?: Client[];
   }
   

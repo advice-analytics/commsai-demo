@@ -1,57 +1,50 @@
-// Import React and necessary hooks
+'use client'
+
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { auth } from '@/utilities/firebaseClient'; // Import the auth object from Firebase client module
+import { auth } from '@/utilities/firebaseClient';
 
-// Define the service categories
 const serviceCategories = [
   { name: 'Retirement', icon: 'retirement-light.svg' },
   { name: 'Financial Plans', icon: 'financial-light.svg' },
   { name: 'Tax Plans', icon: 'money-light.svg' },
   { name: 'Investment', icon: 'investement-light.svg' },
   { name: 'Estate Plans', icon: 'estate-light.svg' },
-  { name: 'Other', icon: 'other-light.svg' },
 ];
 
-// Define the AdvisorBanner component
 const AdvisorBanner: React.FC = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
-  const [valuePropId, setValuePropId] = useState<string>(''); // State to store value proposition ID
+  const [valuePropId, setValuePropId] = useState<string>('');
 
-  // Effect to subscribe to Firebase Auth state changes
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setUserEmail(user.email);
-        // Simulate fetching value prop ID from database based on user (replace with actual logic)
-        setValuePropId('12345678'); // Example value proposition ID
+        const uidString = user.uid.toString();
+        const lastFiveDigits = uidString.slice(-5);
+        const commsId = lastFiveDigits.toUpperCase().padStart(5, '0');
+        setValuePropId(commsId);
       } else {
         setUserEmail(null);
         setValuePropId('');
       }
     });
-
-    return () => unsubscribe(); // Clean up the subscription on unmount
+    return () => unsubscribe();
   }, []);
 
-  // Handler for file input change (profile picture upload)
   const handleFileInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files[0];
-
     if (file) {
       try {
         const userIdentifier = userEmail?.replace(/[^\w\s]/gi, '');
         const fileExtension = file.name.split('.').pop();
-
         if (!fileExtension) {
           console.error('Invalid file format');
           return;
         }
-
         const downloadUrl = `/profilePictures/${userIdentifier}.${fileExtension}`;
         setProfilePictureUrl(downloadUrl);
-
         console.log('Profile picture uploaded successfully!');
       } catch (error) {
         console.error('Error uploading profile picture:', error);
@@ -59,10 +52,8 @@ const AdvisorBanner: React.FC = () => {
     }
   };
 
-  // Handler for clicking on the value proposition ID
   const handleValuePropClick = () => {
-    console.log('Navigate to value proposition:', valuePropId); // Navigate to value prop section (replace with actual navigation logic)
-    // Implement navigation logic to the value proposition section
+    console.log('Navigate to value proposition:', valuePropId);
   };
 
   return (
@@ -72,7 +63,7 @@ const AdvisorBanner: React.FC = () => {
           {profilePictureUrl ? (
             <Image src={profilePictureUrl} alt="Profile" width={100} height={100} />
           ) : (
-            <Image src="/profilephoto.png" alt="Profile Picture" width={100} height={100} priority />
+            <Image src="/profilephoto.png" alt="Profile Picture" width={150} height={150} priority />
           )}
           <input
             type="file"
@@ -83,20 +74,46 @@ const AdvisorBanner: React.FC = () => {
           />
         </div>
         <div className='advisor-info'>
-          <div className='commsid' onClick={handleValuePropClick}>
-            Your CommsID: <span className='valuePropId' onClick={handleValuePropClick}>{valuePropId}</span>
-          </div>
           <div className='username'>{userEmail}</div>
+          <div className='commsid'>
+            Your CommsID: <span className='valuePropId'>{valuePropId}</span>
+          </div>
+          <div className='value-prop-link' onClick={handleValuePropClick}>
+            <u>Value Proposition</u>
+          </div>
         </div>
       </div>
-      <div className='service-section'>
-        {serviceCategories.map((category, index) => (
-          <div key={index} className='service-category'>
-            <Image src={`/light/${category.icon}`} alt={category.name} className='category-icon' width={24} height={24} />
-            <span>{category.name}</span>
-          </div>
-        ))}
+      <div className='service-section-container'>
+        <div className='service-section'>
+          {serviceCategories.map((category, index) => (
+            <div key={index} className='service-category'>
+              {category.name}
+            </div>
+          ))}
+        </div>
       </div>
+      <style jsx>{`
+        .advisor-banner {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 20px;
+        }
+        .service-section-container {
+          display: flex;
+          justify-content: center;
+          margin-top: 20px;
+        }
+        .service-section {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        .service-category {
+          font-size: 10px;
+          color: #fff;
+        }
+      `}</style>
     </div>
   );
 };

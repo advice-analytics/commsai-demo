@@ -6,9 +6,10 @@ import PlanTable from '@/components/advisor/tables/PlanTable';
 import ParticipantTable from '@/components/advisor/tables/ParticipantTable';
 import ClientTable from '@/components/advisor/tables/ClientTable';
 import ValueProp from '@/components/advisor/ValueProp';
-import TakeAction from '@/components/campaigns/TakeAction';
+import Campaigns from '@/components/campaigns/Campaigns';
 import { ValuePropProvider } from '@/components/context/ValuePropContext';
 import { Plan, Participant, Client } from '@/types/PlanTypes';
+import { useAuth } from '@/components/context/authContext';
 
 interface NavigationItem {
   id: number;
@@ -19,7 +20,7 @@ const Page: React.FC = () => {
   const [navigationItems] = useState<NavigationItem[]>([
     { id: 1, label: 'Plan Table' },
     { id: 2, label: 'Value Proposition' },
-    { id: 3, label: 'Take Action' },
+    { id: 3, label: 'Campaigns' },
   ]);
 
   const [selectedNavItem, setSelectedNavItem] = useState<NavigationItem>(navigationItems[0]);
@@ -27,6 +28,9 @@ const Page: React.FC = () => {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
   const [valuePropId, setValuePropId] = useState<string>(''); // Define valuePropId state
+
+  const [userData, setUser] = useAuth(); // Retrieve user data from authentication context
+  const userUid: string = userData?.uid || ''; // Obtain user UID from user data
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -126,12 +130,20 @@ const Page: React.FC = () => {
       case 'Value Proposition':
         return (
           <ValuePropProvider>
-             <ValueProp valuePropId={valuePropId} onValuePropChange={handleValuePropChange} />
-           </ValuePropProvider>
+            <ValueProp
+              valuePropId="12345678" // Example value proposition ID (replace with actual value)
+              userId={userUid} // User ID associated with the value proposition
+              ageGroup="30-45" // Example age group (replace with actual age group)
+              role="Advisor" // Example role (replace with actual role)
+              description="Financial advisor specializing in retirement planning" // Example description
+              interests={['Retirement', 'Investments', 'Estate Plans']} // Example interests
+              onValuePropChange={handleValuePropChange} // Function to handle value proposition change
+            />
+          </ValuePropProvider>
         );
-      case 'Take Action':
+      case 'Campaigns':
         return (
-          <TakeAction selectedClient={selectedParticipant} valueProp="Your value proposition" />
+          <Campaigns selectedClient={selectedParticipant} />
         );
       default:
         return null;

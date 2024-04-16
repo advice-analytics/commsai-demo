@@ -145,7 +145,7 @@ html, body {
 /* Styling for profile-picture */
 .profile-picture img {
   width: 100%;
-  height: auto;
+  height: 100%;
 }
 
 /* Styling for advisor-info */
@@ -167,18 +167,8 @@ html, body {
 .service-category {
   display: flex;
   align-items: center;
-  padding: 8px 12px;
-  border-radius: 20px;
-  background-color: #144e74;
-  border-color: #fff;
   margin: 5px;
   font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.service-category:hover {
-  background-color: #000;
 }
 
 .category-icon {
@@ -189,8 +179,17 @@ html, body {
 
 
 /* Styling for username and commsid */
-.username, .commsid {
+.username {
   font-size: 12px;
+  margin-top: 10px;
+  color: #F8C239;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.commsid {
+  font-size: 10px;
   margin-top: 10px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -198,16 +197,18 @@ html, body {
 }
 
 .valuePropId {
-  font-size: 14px;
+  font-size: 10px;
   cursor: pointer;
-  text-decoration: underline;
+  color: #32D296;
 }
 
 .valuePropId:hover {
   text-decoration: underline;
 }
 
-
+.value-prop-link {
+  font-size: 10px;
+}
 
 @media (max-width: 640px) {
   .main-container {
@@ -229,7 +230,6 @@ html, body {
   }
 
   .content-container {
-    width: 100%;
     padding: 20px;
   }
 

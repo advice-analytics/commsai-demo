@@ -12,6 +12,10 @@ export interface Participant {
   investment: number;
   estate: number;
   other: number;
+  incomeFrom?: number; // Add incomeFrom property
+  incomeTo?: number; // Add incomeTo property
+  balanceFrom?: number; // Add balanceFrom property
+  balanceTo?: number; // Remove this if not needed, or use balance instead
   clients?: Client[];
 }
 
