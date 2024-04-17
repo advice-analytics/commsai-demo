@@ -1,0 +1,1493 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Comms AI V1",
+    "description": "Fast API backend for Comms AI",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/v1/admin/upload/plan-data": {
+      "post": {
+        "tags": [
+          "admin-upload"
+        ],
+        "summary": "Upload Plan Data",
+        "description": "Upload Plan Data",
+        "operationId": "upload_plan_data_v1_admin_upload_plan_data_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_plan_data_v1_admin_upload_plan_data_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteUserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No `Authorization` access token header, token is invalid or user removed",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "not authenticated": {
+                    "summary": "No authorization token header",
+                    "value": {
+                      "detail": "Not authenticated"
+                    }
+                  },
+                  "invalid token": {
+                    "summary": "Token validation failed, decode failed, it may be expired or malformed",
+                    "value": {
+                      "detail": "Token invalid: {detailed error msg}"
+                    }
+                  },
+                  "removed user": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "detail": "Invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/admin/upload/advisor-data": {
+      "post": {
+        "tags": [
+          "admin-upload"
+        ],
+        "summary": "Upload Advisor Data",
+        "description": "Upload Advisor Data",
+        "operationId": "upload_advisor_data_v1_admin_upload_advisor_data_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_advisor_data_v1_admin_upload_advisor_data_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No `Authorization` access token header, token is invalid or user removed",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "not authenticated": {
+                    "summary": "No authorization token header",
+                    "value": {
+                      "detail": "Not authenticated"
+                    }
+                  },
+                  "invalid token": {
+                    "summary": "Token validation failed, decode failed, it may be expired or malformed",
+                    "value": {
+                      "detail": "Token invalid: {detailed error msg}"
+                    }
+                  },
+                  "removed user": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "detail": "Invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/admin/partner/": {
+      "post": {
+        "tags": [
+          "admin-partner"
+        ],
+        "summary": "Create Partner",
+        "description": "Create Partner",
+        "operationId": "create_partner_v1_admin_partner__post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAdminPartnerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAdminPartnerResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No `Authorization` access token header, token is invalid or user removed",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "not authenticated": {
+                    "summary": "No authorization token header",
+                    "value": {
+                      "detail": "Not authenticated"
+                    }
+                  },
+                  "invalid token": {
+                    "summary": "Token validation failed, decode failed, it may be expired or malformed",
+                    "value": {
+                      "detail": "Token invalid: {detailed error msg}"
+                    }
+                  },
+                  "removed user": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "detail": "Invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "admin-partner"
+        ],
+        "summary": "Get Partner",
+        "description": "Get Partners",
+        "operationId": "get_partner_v1_admin_partner__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          },
+          {
+            "name": "ext_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Ext Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetAdminPartnerResponse"
+                  },
+                  "title": "Response Get Partner V1 Admin Partner  Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No `Authorization` access token header, token is invalid or user removed",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "not authenticated": {
+                    "summary": "No authorization token header",
+                    "value": {
+                      "detail": "Not authenticated"
+                    }
+                  },
+                  "invalid token": {
+                    "summary": "Token validation failed, decode failed, it may be expired or malformed",
+                    "value": {
+                      "detail": "Token invalid: {detailed error msg}"
+                    }
+                  },
+                  "removed user": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "detail": "Invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/data-partner/": {
+      "post": {
+        "tags": [
+          "admin-data-partner"
+        ],
+        "summary": "Create Data Partner",
+        "description": "Create Data Partner",
+        "operationId": "create_data_partner_v1_admin_data_partner__post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAdminDataPartnerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAdminDataPartnerResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No `Authorization` access token header, token is invalid or user removed",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "not authenticated": {
+                    "summary": "No authorization token header",
+                    "value": {
+                      "detail": "Not authenticated"
+                    }
+                  },
+                  "invalid token": {
+                    "summary": "Token validation failed, decode failed, it may be expired or malformed",
+                    "value": {
+                      "detail": "Token invalid: {detailed error msg}"
+                    }
+                  },
+                  "removed user": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "detail": "Invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "admin-data-partner"
+        ],
+        "summary": "Get Data Partner",
+        "description": "Get Data Partner",
+        "operationId": "get_data_partner_v1_admin_data_partner__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetAdminDataPartnerResponse"
+                  },
+                  "title": "Response Get Data Partner V1 Admin Data Partner  Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No `Authorization` access token header, token is invalid or user removed",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "not authenticated": {
+                    "summary": "No authorization token header",
+                    "value": {
+                      "detail": "Not authenticated"
+                    }
+                  },
+                  "invalid token": {
+                    "summary": "Token validation failed, decode failed, it may be expired or malformed",
+                    "value": {
+                      "detail": "Token invalid: {detailed error msg}"
+                    }
+                  },
+                  "removed user": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "detail": "Invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/admin/plan/": {
+      "post": {
+        "tags": [
+          "admin-plan"
+        ],
+        "summary": "Create Plan",
+        "description": "Create Plan",
+        "operationId": "create_plan_v1_admin_plan__post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAdminPlanRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAdminPlanResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No `Authorization` access token header, token is invalid or user removed",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "not authenticated": {
+                    "summary": "No authorization token header",
+                    "value": {
+                      "detail": "Not authenticated"
+                    }
+                  },
+                  "invalid token": {
+                    "summary": "Token validation failed, decode failed, it may be expired or malformed",
+                    "value": {
+                      "detail": "Token invalid: {detailed error msg}"
+                    }
+                  },
+                  "removed user": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "detail": "Invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "admin-plan"
+        ],
+        "summary": "Get Plan",
+        "description": "Get Plans",
+        "operationId": "get_plan_v1_admin_plan__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          },
+          {
+            "name": "ext_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Ext Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetAdminPlanResponse"
+                  },
+                  "title": "Response Get Plan V1 Admin Plan  Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No `Authorization` access token header, token is invalid or user removed",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "not authenticated": {
+                    "summary": "No authorization token header",
+                    "value": {
+                      "detail": "Not authenticated"
+                    }
+                  },
+                  "invalid token": {
+                    "summary": "Token validation failed, decode failed, it may be expired or malformed",
+                    "value": {
+                      "detail": "Token invalid: {detailed error msg}"
+                    }
+                  },
+                  "removed user": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "detail": "Invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/advisor/profile/": {
+      "get": {
+        "tags": [
+          "advisor-profile"
+        ],
+        "summary": "Get Advisor Profile",
+        "description": "Get Self Advisor Profile",
+        "operationId": "get_advisor_profile_v1_advisor_profile__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAdvisorProfileResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No `Authorization` access token header, token is invalid or user removed",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "not authenticated": {
+                    "summary": "No authorization token header",
+                    "value": {
+                      "detail": "Not authenticated"
+                    }
+                  },
+                  "invalid token": {
+                    "summary": "Token validation failed, decode failed, it may be expired or malformed",
+                    "value": {
+                      "detail": "Token invalid: {detailed error msg}"
+                    }
+                  },
+                  "removed user": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "detail": "Invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "advisor-profile"
+        ],
+        "summary": "Update Advisor Profile",
+        "description": "Update Self Advisor Profile",
+        "operationId": "update_advisor_profile_v1_advisor_profile__put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAdvisorProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No `Authorization` access token header, token is invalid or user removed",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "not authenticated": {
+                    "summary": "No authorization token header",
+                    "value": {
+                      "detail": "Not authenticated"
+                    }
+                  },
+                  "invalid token": {
+                    "summary": "Token validation failed, decode failed, it may be expired or malformed",
+                    "value": {
+                      "detail": "Token invalid: {detailed error msg}"
+                    }
+                  },
+                  "removed user": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "detail": "Invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/advisor/plan/": {
+      "post": {
+        "tags": [
+          "advisor-plan"
+        ],
+        "summary": "Create New Plan",
+        "description": "Upload New Plan Data",
+        "operationId": "create_new_plan_v1_advisor_plan__post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_new_plan_v1_advisor_plan__post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No `Authorization` access token header, token is invalid or user removed",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "not authenticated": {
+                    "summary": "No authorization token header",
+                    "value": {
+                      "detail": "Not authenticated"
+                    }
+                  },
+                  "invalid token": {
+                    "summary": "Token validation failed, decode failed, it may be expired or malformed",
+                    "value": {
+                      "detail": "Token invalid: {detailed error msg}"
+                    }
+                  },
+                  "removed user": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "detail": "Invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/advisor/plan/{plan_id}": {
+      "get": {
+        "tags": [
+          "advisor-plan"
+        ],
+        "summary": "Get Plan Details",
+        "description": "Get Plan Details",
+        "operationId": "get_plan_details_v1_advisor_plan__plan_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Plan Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAdvisorPlanResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No `Authorization` access token header, token is invalid or user removed",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "not authenticated": {
+                    "summary": "No authorization token header",
+                    "value": {
+                      "detail": "Not authenticated"
+                    }
+                  },
+                  "invalid token": {
+                    "summary": "Token validation failed, decode failed, it may be expired or malformed",
+                    "value": {
+                      "detail": "Token invalid: {detailed error msg}"
+                    }
+                  },
+                  "removed user": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "detail": "Invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Body_create_new_plan_v1_advisor_plan__post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_create_new_plan_v1_advisor_plan__post"
+      },
+      "Body_upload_advisor_data_v1_admin_upload_advisor_data_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_advisor_data_v1_admin_upload_advisor_data_post"
+      },
+      "Body_upload_plan_data_v1_admin_upload_plan_data_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_plan_data_v1_admin_upload_plan_data_post"
+      },
+      "CreateAdminDataPartnerRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "external_id": {
+            "type": "string",
+            "title": "External Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "external_id"
+        ],
+        "title": "CreateAdminDataPartnerRequest"
+      },
+      "CreateAdminPartnerRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "external_id": {
+            "type": "string",
+            "title": "External Id"
+          },
+          "tier_id": {
+            "type": "string",
+            "title": "Tier Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "external_id",
+          "tier_id"
+        ],
+        "title": "CreateAdminPartnerRequest"
+      },
+      "CreateAdminPartnerResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "license_validity": {
+            "type": "string",
+            "format": "date",
+            "title": "License Validity"
+          },
+          "external_id": {
+            "type": "string",
+            "title": "External Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "license_validity",
+          "external_id"
+        ],
+        "title": "CreateAdminPartnerResponse"
+      },
+      "CreateAdminPlanRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "external_id": {
+            "type": "string",
+            "title": "External Id"
+          },
+          "partner_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Partner Id"
+          },
+          "data_partner_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Partner Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "external_id",
+          "partner_id",
+          "data_partner_id"
+        ],
+        "title": "CreateAdminPlanRequest"
+      },
+      "GetAdminDataPartnerResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "external_id": {
+            "type": "string",
+            "title": "External Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "external_id"
+        ],
+        "title": "GetAdminDataPartnerResponse"
+      },
+      "GetAdminPartnerResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "license_validity": {
+            "type": "string",
+            "format": "date",
+            "title": "License Validity"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "tier": {
+            "type": "string",
+            "title": "Tier"
+          },
+          "external_id": {
+            "type": "string",
+            "title": "External Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "license_validity",
+          "name",
+          "tier",
+          "external_id"
+        ],
+        "title": "GetAdminPartnerResponse"
+      },
+      "GetAdminPlanResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "external_id": {
+            "type": "string",
+            "title": "External Id"
+          },
+          "partner_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Partner Id"
+          },
+          "data_partner_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Partner Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "external_id",
+          "partner_id",
+          "data_partner_id"
+        ],
+        "title": "GetAdminPlanResponse"
+      },
+      "GetAdvisorPlan": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "GetAdvisorPlan"
+      },
+      "GetAdvisorPlanPartnerResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "external_id": {
+            "type": "string",
+            "title": "External Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "external_id"
+        ],
+        "title": "GetAdvisorPlanPartnerResponse"
+      },
+      "GetAdvisorPlanResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "partner": {
+            "$ref": "#/components/schemas/GetAdvisorPlanPartnerResponse"
+          },
+          "data_partner": {
+            "$ref": "#/components/schemas/GetAdminDataPartnerResponse"
+          },
+          "advisors": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Advisors",
+            "default": []
+          },
+          "external_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "partner",
+          "data_partner",
+          "external_id"
+        ],
+        "title": "GetAdvisorPlanResponse"
+      },
+      "GetAdvisorProfileResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "external_id": {
+            "type": "string",
+            "title": "External Id"
+          },
+          "partner_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Id"
+          },
+          "plans": {
+            "items": {
+              "$ref": "#/components/schemas/GetAdvisorPlan"
+            },
+            "type": "array",
+            "title": "Plans",
+            "default": []
+          },
+          "target_age_groups": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Target Age Groups",
+            "default": []
+          },
+          "target_roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Target Roles",
+            "default": []
+          },
+          "target_role_desc": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Role Desc"
+          },
+          "how_unique": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "How Unique"
+          },
+          "value_proposition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value Proposition"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "external_id"
+        ],
+        "title": "GetAdvisorProfileResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "InviteUserResponse": {
+        "properties": {
+          "emails": {
+            "items": {
+              "type": "string",
+              "format": "email"
+            },
+            "type": "array",
+            "title": "Emails",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "InviteUserResponse"
+      },
+      "UpdateAdvisorProfileRequest": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "external_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Id"
+          },
+          "partner_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Id"
+          },
+          "target_age_groups": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Target Age Groups",
+            "default": []
+          },
+          "target_roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Target Roles",
+            "default": []
+          },
+          "target_role_desc": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Role Desc"
+          },
+          "how_unique": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "How Unique"
+          },
+          "value_proposition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value Proposition"
+          }
+        },
+        "type": "object",
+        "title": "UpdateAdvisorProfileRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}
