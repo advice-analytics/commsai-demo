@@ -15,7 +15,7 @@ def hello_world():
 class UploadPlanDataRequest(BaseModel):
     file: UploadFile
 
-@app.post("api/v1/admin/upload/plan-data", status_code=201)
+@app.post("/api/v1/admin/upload/plan-data", status_code=201)
 def upload_plan_data_v1_admin_upload_plan_data_post(request: UploadPlanDataRequest):
     try:
         # Process the uploaded file (request.file) here
@@ -29,7 +29,7 @@ def upload_plan_data_v1_admin_upload_plan_data_post(request: UploadPlanDataReque
 class UploadAdvisorDataRequest(BaseModel):
     file: UploadFile
 
-@app.post("api/v1/admin/upload/advisor-data", status_code=201)
+@app.post("/api/v1/admin/upload/advisor-data", status_code=201)
 def upload_advisor_data_v1_admin_upload_advisor_data_post(request: UploadAdvisorDataRequest):
     try:
         # Process the uploaded file (request.file) here
@@ -49,7 +49,7 @@ class CreateAdminPartnerResponse(BaseModel):
     license_validity: str
     external_id: str
 
-@app.post("api/v1/admin/partner/", response_model=CreateAdminPartnerResponse, status_code=201)
+@app.post("/api/v1/admin/partner/", response_model=CreateAdminPartnerResponse, status_code=201)
 def create_partner_v1_admin_partner__post(request: CreateAdminPartnerRequest):
     try:
         # Example: Generate partner_id and save partner details
@@ -68,7 +68,7 @@ class GetAdminPartnerResponse(BaseModel):
     tier: str
     external_id: str
 
-@app.get("api/v1/admin/partner/", response_model=List[GetAdminPartnerResponse])
+@app.get("/api/v1/admin/partner/", response_model=List[GetAdminPartnerResponse])
 def get_partner_v1_admin_partner__get(name: Optional[str] = None, tier: Optional[str] = None):
     try:
         # Example: Fetch partner data based on provided parameters
@@ -93,7 +93,7 @@ class GetAdminDataPartnerResponse(BaseModel):
     name: str
     external_id: str
 
-@app.post("api/v1/admin/data-partner/", response_model=GetAdminDataPartnerResponse, status_code=201)
+@app.post("/api/v1/admin/data-partner/", response_model=GetAdminDataPartnerResponse, status_code=201)
 def create_data_partner_v1_admin_data_partner__post(request: CreateAdminDataPartnerRequest):
     try:
         # Example: Generate data_partner_id and save data partner details
@@ -103,7 +103,7 @@ def create_data_partner_v1_admin_data_partner__post(request: CreateAdminDataPart
     except Exception as e:
         raise HTTPException(status_code=422, detail=str(e))
 
-@app.get("api/v1/admin/data-partner/", response_model=List[GetAdminDataPartnerResponse])
+@app.get("/api/v1/admin/data-partner/", response_model=List[GetAdminDataPartnerResponse])
 def get_data_partner_v1_admin_data_partner__get(name: Optional[str] = None):
     try:
         # Example: Fetch data partner(s) based on provided parameters
@@ -132,7 +132,7 @@ class GetAdminPlanResponse(BaseModel):
     partner_id: str
     data_partner_id: str
 
-@app.post("api/v1/admin/plan/", response_model=GetAdminPlanResponse, status_code=201)
+@app.post("/api/v1/admin/plan/", response_model=GetAdminPlanResponse, status_code=201)
 def create_plan_v1_admin_plan__post(request: CreateAdminPlanRequest):
     try:
         # Example: Generate plan_id and save plan details
@@ -142,7 +142,7 @@ def create_plan_v1_admin_plan__post(request: CreateAdminPlanRequest):
     except Exception as e:
         raise HTTPException(status_code=422, detail=str(e))
 
-@app.get("api/v1/admin/plan/", response_model=List[GetAdminPlanResponse])
+@app.get("/api/v1/admin/plan/", response_model=List[GetAdminPlanResponse])
 def get_plan_v1_admin_plan__get(name: Optional[str] = None, external_id: Optional[str] = None):
     try:
         # Example: Fetch plan(s) based on provided parameters
@@ -163,7 +163,7 @@ class CreateNewPlanRequest(BaseModel):
     plan_details: str
     plan_file: UploadFile
 
-@app.post("api/v1/advisor/plan/", status_code=201)
+@app.post("/api/v1/advisor/plan/", status_code=201)
 def create_new_plan_v1_advisor_plan__post(request: CreateNewPlanRequest):
     try:
         # Process the uploaded plan file and create a new plan
@@ -187,7 +187,7 @@ class GetAdvisorPlanPartnerResponse(BaseModel):
     name: str
     external_id: str
 
-@app.get("api/v1/advisor/plan/{plan_id}", response_model=GetAdvisorPlanResponse)
+@app.get("/api/v1/advisor/plan/{plan_id}", response_model=GetAdvisorPlanResponse)
 def get_plan_details_v1_advisor_plan__plan_id__get(plan_id: str):
     try:
         # Example: Retrieve plan details based on the provided plan_id
