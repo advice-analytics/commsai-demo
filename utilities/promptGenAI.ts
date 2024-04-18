@@ -80,10 +80,6 @@ export const generateCampaignPrompt = async (
   campaignType: string,
   adviceScores: string[],
   ageGroup: string,
-  incomeFrom: number,
-  incomeTo: number,
-  balanceFrom: number,
-  balanceTo: number,
   userId: string // Pass the user's UID
 ): Promise<string> => {
   const content: PromptContent = {
@@ -91,8 +87,6 @@ export const generateCampaignPrompt = async (
     'Campaign Type': campaignType,
     'Advice Scores': adviceScores,
     'Age Group': ageGroup,
-    'Income': `From ${incomeFrom} To ${incomeTo}`,
-    'Balance': `From ${balanceFrom} To ${balanceTo}`,
   };
 
   const sessionId = userId; // Use the user's UID as the session ID

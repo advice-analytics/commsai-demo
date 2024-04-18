@@ -1,8 +1,15 @@
-'use client'
+'use client';
 
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import Image from 'next/image';
-import { sendSignInEmailLink, createAccountWithEmail, auth } from '@/utilities/firebaseClient';
+import {
+  sendSignInEmailLink,
+  createAccountWithEmail,
+  signInUserWithEmailAndPassword, // Use signInUserWithEmailAndPassword for signing in
+  auth,
+} from '@/utilities/firebaseClient';
+import { isSignInWithEmailLink } from 'firebase/auth'; // Import the isSignInWithEmailLink method
+import { signInWithEmailLink } from 'firebase/auth'; // Import the signInWithEmailLink function
 
 const Home: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -10,19 +17,6 @@ const Home: React.FC = () => {
   const [creatingAccount, setCreatingAccount] = useState(false);
   const [accountCreated, setAccountCreated] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user && accountCreated) {
-        console.log('User is signed in:', user.email);
-        window.location.href = '/advisor'; // Redirect to advisor page if user is authenticated and account is created
-      } else {
-        console.log('No user is signed in');
-      }
-    });
-
-    return () => unsubscribe(); // Clean up subscription on unmount
-  }, [accountCreated]); // Add accountCreated to the dependency array
 
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
@@ -32,24 +26,7 @@ const Home: React.FC = () => {
     setPassword(e.target.value);
   };
 
-  const handleSendSignInLink = () => {
-    if (!email) {
-      setError('Please enter your email.');
-      return;
-    }
-
-    sendSignInEmailLink(email)
-      .then(() => {
-        console.log('Sign-in link sent to email:', email);
-        // Optionally show a success message to the user
-      })
-      .catch((error) => {
-        console.error('Error sending sign-in link:', error);
-        setError('Error sending sign-in link. Please try again.');
-      });
-  };
-
-  const handleCreateAccount = (e: FormEvent<HTMLFormElement>) => {
+  const handleCreateAccount = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent default form submission behavior
 
     if (!email || !password) {
@@ -64,29 +41,66 @@ const Home: React.FC = () => {
 
     setCreatingAccount(true);
 
-    // Call createAccountWithEmail with the provided email and password
-    createAccountWithEmail(email, password)
-      .then(() => {
+    try {
+      // Try signing in with the provided email and password
+      await signInUserWithEmailAndPassword(email, password);
+      console.log('User signed in successfully with email:', email);
+      // Redirect the user to the advisor page after successful sign-in
+      window.location.href = '/advisor';
+    } catch (signInError) {
+      // If sign-in fails, create a new account
+      try {
+        await createAccountWithEmail(email, password);
         setAccountCreated(true);
         // Send sign-in link after account creation
-        sendSignInEmailLink(email)
-          .then(() => {
-            console.log('Sign-in link sent to email:', email);
-            // Optionally show a success message to the user
-          })
-          .catch((error) => {
-            console.error('Error sending sign-in link:', error);
-            setError('Error sending sign-in link. Please try again.');
-          });
-      })
-      .catch((error) => {
-        console.error('Error creating user account:', error);
-        setError('An error occurred while creating the user account. Please try again.');
-      })
-      .finally(() => {
-        setCreatingAccount(false);
-      });
+        await sendSignInEmailLink(email);
+        console.log('Sign-in link sent to email:', email);
+
+        // Automatically sign in the user after account creation
+        await signInUserWithEmailAndPassword(email, password);
+        console.log('User signed in successfully after account creation:', email);
+
+        // Redirect the user to the advisor page after successful sign-in
+        window.location.href = '/advisor';
+      } catch (createError) {
+        console.error('Error creating user account:', createError);
+        setError('An error occurred while creating or signing in the user account. Please try again.');
+      }
+    } finally {
+      setCreatingAccount(false);
+    }
   };
+
+  useEffect(() => {
+    const handleSignInWithEmail = async () => {
+      // Check if there is a valid sign-in link in the URL
+      if (isSignInWithEmailLink(auth, window.location.href)) {
+        try {
+          let userEmail = window.localStorage.getItem('userEmailForSignIn');
+          if (!userEmail) {
+            // Prompt user to enter their email if it's not already available
+            userEmail = window.prompt('Please provide your email for confirmation');
+          }
+
+          if (userEmail) {
+            // Sign in the user with the email and the received link
+            await signInWithEmailLink(auth, userEmail, window.location.href); // Use signInWithEmailLink function
+            console.log('User successfully signed in with email:', userEmail);
+            // Redirect the user to the advisor page after successful sign-in
+            window.location.href = '/advisor';
+          } else {
+            console.error('User email is required for sign-in');
+            setError('User email is required for sign-in. Please try again.');
+          }
+        } catch (signInError) {
+          console.error('Error signing in with email link:', signInError);
+          setError('Error signing in with email link. Please try again.');
+        }
+      }
+    };
+
+    handleSignInWithEmail();
+  }, []); // Run once on component mount to handle email sign-in
 
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col justify-center items-center">
@@ -111,7 +125,7 @@ const Home: React.FC = () => {
 
       {/* Main Content Section */}
       <main className="bg-white p-6 rounded-lg shadow-md max-w-md w-full">
-        {/* Form to handle account creation */}
+        {/* Form to handle account creation or sign-in */}
         <form onSubmit={handleCreateAccount} className="flex flex-col items-center space-y-6">
           {/* Email Input */}
           <input
@@ -122,7 +136,7 @@ const Home: React.FC = () => {
             className="border border-gray-300 rounded-lg px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-navyblue"
           />
 
-          {/* Password Input (Only for creating account) */}
+          {/* Password Input (Only for account creation) */}
           {!accountCreated && (
             <input
               type="password"

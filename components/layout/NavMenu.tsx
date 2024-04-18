@@ -4,12 +4,13 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import NextImage from 'next/image';
 import Link from 'next/link';
 
-import LogoImage from '@/public/main-logo.png';
+import LogoImage from '@/public/commsai.png';
 
 import HeaderNavLink from './HeaderNavLink';
 
 const menuItems = [
-  { label: `Portal`, url: `advisor` },
+  { label: `Advisor`, url: `advisor` },
+  { label: `Admin`, url: `admin` },
   { label: 'Log out', url: '/' },
 ];
 
@@ -39,7 +40,7 @@ const NavMenu: React.FC<NavMenuProps> = ({}) => {
           <div className='mx-auto max-w-7xl px-2 sm:px-4 lg:px-8'>
             <div className='flex h-16 justify-between'>
               <div className='flex px-2 lg:px-0 items-center'>
-                <Link href="/docs">
+                <Link href="/">
                   <NextImage
                     className='h-8 w-auto'
                     src={LogoImage}
@@ -59,7 +60,7 @@ const NavMenu: React.FC<NavMenuProps> = ({}) => {
                           {item.label}
                         </button>
                       ) : (
-                        <button className='text-navyblue hover:text-gray-200'>
+                        <button className='text-navyblue hover:navyblue'>
                           {item.label}
                         </button>
                       )}

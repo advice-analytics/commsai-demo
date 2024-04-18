@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import {
   getAuth,
   createUserWithEmailAndPassword,
+  signInWithEmailAndPassword, // Import signInWithEmailAndPassword method
   UserCredential,
   sendSignInLinkToEmail,
   isSignInWithEmailLink,
@@ -38,6 +39,17 @@ const createAccountWithEmail = async (email: string, password: string): Promise<
     return userCredential;
   } catch (error: any) {
     console.error('Error creating user account:', error.message);
+    throw error;
+  }
+};
+
+// Function to sign in user with email and password
+const signInUserWithEmailAndPassword = async (email: string, password: string): Promise<UserCredential> => {
+  try {
+    const userCredential: UserCredential = await signInWithEmailAndPassword(auth, email, password);
+    return userCredential;
+  } catch (error: any) {
+    console.error('Error signing in with email and password:', error.message);
     throw error;
   }
 };
@@ -95,6 +107,7 @@ const saveCampaignToDatabase = async (uid: string, campaignData: any): Promise<v
 export {
   auth,
   createAccountWithEmail,
+  signInUserWithEmailAndPassword, // Export signInUserWithEmailAndPassword method
   sendSignInEmailLink,
   completeSignInWithEmailLink,
   saveValuePropToDatabase,

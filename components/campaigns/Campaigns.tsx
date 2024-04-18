@@ -16,13 +16,10 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
   const [newCampaignName, setNewCampaignName] = useState('');
   const [newCampaignType, setNewCampaignType] = useState('');
   const [newCampaignAgeGroup, setNewCampaignAgeGroup] = useState('');
-  const [newCampaignIncomeFrom, setNewCampaignIncomeFrom] = useState<number>(0);
-  const [newCampaignIncomeTo, setNewCampaignIncomeTo] = useState<number>(0);
-  const [newCampaignBalanceFrom, setNewCampaignBalanceFrom] = useState<number>(0);
-  const [newCampaignBalanceTo, setNewCampaignBalanceTo] = useState<number>(0);
-
   const [userData, setUser] = useAuth(); // Destructure user data and update function
   const userUid: string = userData?.uid || ''; // Use optional chaining to access uid safely
+
+  const ageRanges = ['Under 25', '25-34', '35-44', '45-54', '55-64', '65+'];
 
   const handleCreateCampaign = async () => {
     const newCampaign: Campaign = {
@@ -30,10 +27,6 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
       name: newCampaignName,
       type: newCampaignType,
       ageGroup: newCampaignAgeGroup,
-      incomeFrom: newCampaignIncomeFrom,
-      incomeTo: newCampaignIncomeTo,
-      balanceFrom: newCampaignBalanceFrom,
-      balanceTo: newCampaignBalanceTo,
     };
 
     try {
@@ -51,10 +44,6 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
         campaign.type,
         [],
         campaign.ageGroup,
-        campaign.incomeFrom,
-        campaign.incomeTo,
-        campaign.balanceFrom,
-        campaign.balanceTo,
         userUid as string // Assert userUid as string
       );
 
@@ -76,10 +65,6 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
     setNewCampaignName('');
     setNewCampaignType('');
     setNewCampaignAgeGroup('');
-    setNewCampaignIncomeFrom(0);
-    setNewCampaignIncomeTo(0);
-    setNewCampaignBalanceFrom(0);
-    setNewCampaignBalanceTo(0);
   };
 
   return (
@@ -98,7 +83,7 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
             value={newCampaignName}
             onChange={(e) => setNewCampaignName(e.target.value)}
             placeholder="Enter campaign name"
-            className="input-field"
+            className="input-field shadow-md px-4 py-3 rounded-lg w-full"
           />
         </div>
         <div>
@@ -111,67 +96,28 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
             value={newCampaignType}
             onChange={(e) => setNewCampaignType(e.target.value)}
             placeholder="Enter campaign type"
-            className="input-field"
+            className="input-field shadow-md px-4 py-3 rounded-lg w-full"
           />
         </div>
         <div>
           <label htmlFor="ageGroup" className="block text-sm font-medium text-gray-600">
             Age Group
           </label>
-          <input
+          <select
             id="ageGroup"
-            type="text"
             value={newCampaignAgeGroup}
             onChange={(e) => setNewCampaignAgeGroup(e.target.value)}
-            placeholder="Enter age group"
-            className="input-field"
-          />
+            className="input-field shadow-md px-4 py-3 rounded-lg w-full"
+          >
+            <option value="">Select age group</option>
+            {ageRanges.map((range) => (
+              <option key={range} value={range}>
+                {range}
+              </option>
+            ))}
+          </select>
         </div>
-        <div className="flex items-center">
-          <label htmlFor="incomeRange" className="block text-sm font-medium text-gray-600 mr-2">
-            Income Range
-          </label>
-          <input
-            id="incomeFrom"
-            type="number"
-            value={newCampaignIncomeFrom}
-            onChange={(e) => setNewCampaignIncomeFrom(Number(e.target.value))}
-            placeholder="From"
-            className="input-field"
-          />
-          <span className="text-gray-500 mx-2">-</span>
-          <input
-            id="incomeTo"
-            type="number"
-            value={newCampaignIncomeTo}
-            onChange={(e) => setNewCampaignIncomeTo(Number(e.target.value))}
-            placeholder="To"
-            className="input-field"
-          />
-        </div>
-        <div className="flex items-center">
-          <label htmlFor="balanceRange" className="block text-sm font-medium text-gray-600 mr-2">
-            Balance Range
-          </label>
-          <input
-            id="balanceFrom"
-            type="number"
-            value={newCampaignBalanceFrom}
-            onChange={(e) => setNewCampaignBalanceFrom(Number(e.target.value))}
-            placeholder="From"
-            className="input-field"
-          />
-          <span className="text-gray-500 mx-2">-</span>
-          <input
-            id="balanceTo"
-            type="number"
-            value={newCampaignBalanceTo}
-            onChange={(e) => setNewCampaignBalanceTo(Number(e.target.value))}
-            placeholder="To"
-            className="input-field"
-          />
-        </div>
-        <button onClick={handleCreateCampaign} className="btn-primary mt-4">
+        <button onClick={handleCreateCampaign} className="btn-primary bg-navyblue text-white mt-4 w-full rounded">
           Create Campaign
         </button>
       </div>
@@ -184,8 +130,6 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
             <h3 className="text-lg font-semibold mb-2">{campaign.name}</h3>
             <p>Type: {campaign.type}</p>
             <p>Age Group: {campaign.ageGroup}</p>
-            <p>Income: {campaign.incomeFrom} - {campaign.incomeTo}</p>
-            <p>Balance: {campaign.balanceFrom} - {campaign.balanceTo}</p>
 
             {/* Action buttons */}
             <div className="mt-4 flex justify-end space-x-4">
