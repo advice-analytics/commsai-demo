@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import AdvisorBanner from '@/components/advisor/banner/AdvisorBanner';
 import PlanTable from '@/components/advisor/tables/PlanTable';
 import ParticipantTable from '@/components/advisor/tables/ParticipantTable';
 import ClientTable from '@/components/advisor/tables/ClientTable';
-import ValueProp from '@/components/advisor/ValueProp';
+import ValueProp from '@/components/advisor/value/ValueProp';
 import Campaigns from '@/components/campaigns/Campaigns';
 import { ValuePropProvider } from '@/components/context/ValuePropContext';
 import { Plan, Participant, Client } from '@/types/PlanTypes';
@@ -14,20 +14,21 @@ import { useAuth } from '@/components/context/authContext';
 interface NavigationItem {
   id: number;
   label: string;
+  disabled?: boolean;
 }
 
 const Page: React.FC = () => {
   const [navigationItems] = useState<NavigationItem[]>([
-    { id: 1, label: 'Plan Table' },
-    { id: 2, label: 'Value Proposition' },
-    { id: 3, label: 'Campaigns' },
+    { id: 1, label: 'Plans' },
+    { id: 2, label: 'Campaigns' },
+    { id: 3, label: 'Coming Soon...', disabled: true },
+    { id: 4, label: 'Coming Soon...', disabled: true },
   ]);
 
   const [selectedNavItem, setSelectedNavItem] = useState<NavigationItem>(navigationItems[0]);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
-  const [valuePropId, setValuePropId] = useState<string>(''); // Define valuePropId state
 
   const [userData, setUser] = useAuth(); // Retrieve user data from authentication context
   const userUid: string = userData?.uid || ''; // Obtain user UID from user data
@@ -106,7 +107,7 @@ const Page: React.FC = () => {
 
   const renderContent = () => {
     switch (selectedNavItem.label) {
-      case 'Plan Table':
+      case 'Plans':
         return (
           <>
             <PlanTable plans={plans} onPlanSelect={handlePlanSelect} />
@@ -160,6 +161,7 @@ const Page: React.FC = () => {
               key={item.id}
               onClick={() => handleNavigationItemClick(item)}
               className={`${selectedNavItem.id === item.id ? 'active' : ''}`}
+              style={{ color: item.disabled ? 'gray' : 'black', cursor: item.disabled ? 'not-allowed' : 'pointer' }}
             >
               {item.label}
             </li>

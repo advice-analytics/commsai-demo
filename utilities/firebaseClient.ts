@@ -2,14 +2,29 @@ import { initializeApp } from 'firebase/app';
 import {
   getAuth,
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword, // Import signInWithEmailAndPassword method
+  signInWithEmailAndPassword,
   UserCredential,
   sendSignInLinkToEmail,
   isSignInWithEmailLink,
   signInWithEmailLink,
   Auth,
 } from 'firebase/auth';
-import { getDatabase, ref, push, Database, set } from 'firebase/database';
+import {
+  getDatabase,
+  ref as dbRef,
+  push,
+  set,
+  Database,
+} from 'firebase/database';
+import {
+  getStorage,
+  ref as storageRef,
+  uploadBytesResumable,
+  getDownloadURL,
+  StorageReference,
+  UploadTask,
+  getMetadata,
+} from 'firebase/storage';
 
 // Firebase configuration object
 const firebaseConfig = {
@@ -31,6 +46,9 @@ const auth: Auth = getAuth(app);
 
 // Initialize Firebase database
 const database: Database = getDatabase(app);
+
+// Initialize Firebase storage
+const storage = getStorage(app);
 
 // Function to create user account with email and password
 const createAccountWithEmail = async (email: string, password: string): Promise<UserCredential> => {
@@ -82,7 +100,7 @@ const completeSignInWithEmailLink = async (email: string, url: string) => {
 // Function to save value proposition to Firebase Realtime Database
 const saveValuePropToDatabase = async (uid: string, valueProp: string): Promise<void> => {
   try {
-    const valuePropRef = ref(database, `users/${uid}/valueProps`);
+    const valuePropRef = dbRef(database, `users/${uid}/valueProps`);
     const newPropRef = push(valuePropRef); // Create a new child node
     await set(newPropRef, { value: valueProp }); // Save value proposition under the new child node
   } catch (error: any) {
@@ -94,7 +112,7 @@ const saveValuePropToDatabase = async (uid: string, valueProp: string): Promise<
 // Function to save campaign data to Firebase Realtime Database
 const saveCampaignToDatabase = async (uid: string, campaignData: any): Promise<void> => {
   try {
-    const campaignsRef = ref(database, `users/${uid}/campaigns`);
+    const campaignsRef = dbRef(database, `users/${uid}/campaigns`);
     const newCampaignRef = push(campaignsRef); // Create a new child node
     await set(newCampaignRef, campaignData); // Save campaign data under the new child node
   } catch (error: any) {
@@ -103,13 +121,64 @@ const saveCampaignToDatabase = async (uid: string, campaignData: any): Promise<v
   }
 };
 
+// Function to upload user profile picture with dynamic file extension
+const uploadProfilePicture = async (uid: string, file: File): Promise<string> => {
+  try {
+    const fileExtension = file.name.split('.').pop(); // Get file extension
+    if (!fileExtension) {
+      throw new Error('Invalid file format');
+    }
+
+    const storageRefPath = `profilePictures/${uid}/${uid}.${fileExtension}`;
+    const storageReference: StorageReference = storageRef(storage, storageRefPath);
+    const uploadTask: UploadTask = uploadBytesResumable(storageReference, file);
+
+    const snapshot = await uploadTask;
+    const downloadURL: string = await getDownloadURL(snapshot.ref);
+
+    return downloadURL;
+  } catch (error: any) {
+    console.error('Error uploading profile picture:', error.message);
+    throw error;
+  }
+};
+
+// Function to get user profile picture download URL with dynamic file extension
+const getProfilePictureURL = async (uid: string): Promise<string | null> => {
+  try {
+    // Assuming the profile picture's file extension is unknown, we retrieve it from the storage reference
+    const storageRefPath = `profilePictures/${uid}/${uid}`; // Storage path without extension
+    const storageReference: StorageReference = storageRef(storage, storageRefPath);
+
+    // Get metadata to extract the file extension
+    const metadata = await getMetadata(storageReference);
+    const fileExtension = metadata.contentType?.split('/')[1]; // Extract file extension from content type
+
+    if (!fileExtension) {
+      throw new Error('Invalid file format');
+    }
+
+    const fullPath = `${storageRefPath}.${fileExtension}`;
+    const updatedStorageReference: StorageReference = storageRef(storage, fullPath);
+    const downloadURL: string = await getDownloadURL(updatedStorageReference);
+
+    return downloadURL;
+  } catch (error: any) {
+    console.error('Error getting profile picture URL:', error.message);
+    return null;
+  }
+};
+
 // Export Firebase services and functions for use in other modules
 export {
   auth,
   createAccountWithEmail,
-  signInUserWithEmailAndPassword, // Export signInUserWithEmailAndPassword method
+  signInUserWithEmailAndPassword,
   sendSignInEmailLink,
   completeSignInWithEmailLink,
   saveValuePropToDatabase,
   saveCampaignToDatabase,
+  uploadProfilePicture,
+  getProfilePictureURL,
+  storage,
 };

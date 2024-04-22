@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Campaign } from '@/types/CampaignTypes';
 import { generateCampaignPrompt } from '@/utilities/promptGenAI';
 import { saveCampaignToDatabase } from '@/utilities/firebaseClient';
@@ -16,10 +16,19 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
   const [newCampaignName, setNewCampaignName] = useState('');
   const [newCampaignType, setNewCampaignType] = useState('');
   const [newCampaignAgeGroup, setNewCampaignAgeGroup] = useState('');
+  const [editingCampaignId, setEditingCampaignId] = useState<string | null>(null);
+  const [editedCampaignPrompt, setEditedCampaignPrompt] = useState<string>('');
+
   const [userData, setUser] = useAuth(); // Destructure user data and update function
   const userUid: string = userData?.uid || ''; // Use optional chaining to access uid safely
 
   const ageRanges = ['Under 25', '25-34', '35-44', '45-54', '55-64', '65+'];
+
+  useEffect(() => {
+
+    const loadedCampaigns: Campaign[] = []; // Fetch campaigns from Firebase
+    setCampaigns(loadedCampaigns);
+  }, []);
 
   const handleCreateCampaign = async () => {
     const newCampaign: Campaign = {
@@ -27,38 +36,53 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
       name: newCampaignName,
       type: newCampaignType,
       ageGroup: newCampaignAgeGroup,
+      prompt: '', // Initialize prompt as empty
+      userId: userUid,
     };
 
     try {
-      await generateAndSavePrompt(newCampaign); // Generate prompt and save campaign
-      clearInputFields(); // Clear input fields after creating campaign
+      const campaignPrompt: string = await generateCampaignPrompt(
+        newCampaign.name,
+        newCampaign.type,
+        [],
+        newCampaign.ageGroup,
+        userUid
+      );
+
+      newCampaign.prompt = campaignPrompt;
+      await saveCampaignToDatabase(userUid, newCampaign);
+      setCampaigns([...campaigns, newCampaign]);
+      clearInputFields();
     } catch (error) {
       console.error('Error creating campaign:', error);
     }
   };
 
-  const generateAndSavePrompt = async (campaign: Campaign) => {
-    try {
-      const campaignPrompt: string = await generateCampaignPrompt(
-        campaign.name,
-        campaign.type,
-        [],
-        campaign.ageGroup,
-        userUid as string // Assert userUid as string
-      );
+  const handleEditCampaign = (campaignId: string) => {
+    setEditingCampaignId(campaignId);
+    const editedCampaign = campaigns.find((campaign) => campaign.id === campaignId);
+    if (editedCampaign) {
+      setEditedCampaignPrompt(editedCampaign.prompt || '');
+    }
+  };
 
-      const campaignWithPrompt: Campaign = { ...campaign, prompt: campaignPrompt, userId: userUid };
-      await saveCampaignToDatabase(userUid, campaignWithPrompt); // Provide both uid and campaignData
-      setCampaigns([...campaigns, campaignWithPrompt]); // Update campaigns state with new campaign
-    } catch (error) {
-      console.error('Error generating campaign prompt:', error);
-      throw error;
+  const handleSaveEditedCampaign = async (campaignId: string) => {
+    const editedCampaignIndex = campaigns.findIndex((campaign) => campaign.id === campaignId);
+    if (editedCampaignIndex !== -1) {
+      const updatedCampaigns = [...campaigns];
+      updatedCampaigns[editedCampaignIndex].prompt = editedCampaignPrompt;
+      setCampaigns(updatedCampaigns);
+      setEditingCampaignId(null);
+
+      // Save updated campaign to Firebase
+      await saveCampaignToDatabase(userUid, updatedCampaigns[editedCampaignIndex]);
     }
   };
 
   const handleDeleteCampaign = (campaignId: string) => {
     const updatedCampaigns = campaigns.filter((campaign) => campaign.id !== campaignId);
     setCampaigns(updatedCampaigns);
+    // Delete campaign from Firebase
   };
 
   const clearInputFields = () => {
@@ -131,10 +155,28 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
             <p>Type: {campaign.type}</p>
             <p>Age Group: {campaign.ageGroup}</p>
 
+            {/* Render campaign prompt or edit input */}
+            {editingCampaignId === campaign.id ? (
+              <textarea
+                value={editedCampaignPrompt}
+                onChange={(e) => setEditedCampaignPrompt(e.target.value)}
+                className="input-field shadow-md px-4 py-3 rounded-lg w-full mt-4"
+              />
+            ) : (
+              <p className="mt-4">{campaign.prompt}</p>
+            )}
+
             {/* Action buttons */}
             <div className="mt-4 flex justify-end space-x-4">
-              <button className="btn-secondary">Edit</button>
-              <button className="btn-primary">Save</button>
+              {editingCampaignId === campaign.id ? (
+                <button onClick={() => handleSaveEditedCampaign(campaign.id)} className="btn-primary">
+                  Save
+                </button>
+              ) : (
+                <button onClick={() => handleEditCampaign(campaign.id)} className="btn-secondary">
+                  Edit
+                </button>
+              )}
               <button onClick={() => handleDeleteCampaign(campaign.id)} className="btn-danger">
                 Delete
               </button>

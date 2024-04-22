@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useValuePropContext } from '../context/ValuePropContext';
+import { useValuePropContext } from '../../context/ValuePropContext';
 import { generateValuePropPrompt } from '@/utilities/promptGenAI';
 import { saveValuePropToDatabase } from '@/utilities/firebaseClient';
 import { openaiApiKey } from '@/constants/env';
@@ -19,13 +19,13 @@ interface ValuePropProps {
 const getColorForRating = (rating: 'poor' | 'ok' | 'good') => {
   switch (rating) {
     case 'poor':
-      return 'text-red-500'; // Use Tailwind CSS class for red color
+      return 'text-red-500';
     case 'ok':
-      return 'text-yellow-500'; // Use Tailwind CSS class for yellow color
+      return 'text-yellow-500';
     case 'good':
-      return 'text-green-500'; // Use Tailwind CSS class for green color
+      return 'text-green-500';
     default:
-      return 'text-gray-500'; // Fallback color (shouldn't hit this)
+      return 'text-gray-500';
   }
 };
 
@@ -42,16 +42,16 @@ const ValueProp: React.FC<ValuePropProps> = ({
   const [promptGenerated, setPromptGenerated] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [valueProp, setValuePropState] = useState('');
-  const [currentChars, setCurrentChars] = useState(0); // Initialize character count
-  const [promptRating, setPromptRating] = useState<'poor' | 'ok' | 'good'>('good');
+  const [currentChars, setCurrentChars] = useState(0);
+  const maxChars = 250;
 
   useEffect(() => {
     const fetchValueProp = async () => {
       const fetchedValueProp = await getValuePropFromDatabase(valuePropId);
       setValuePropState(fetchedValueProp);
-      setValueProp(fetchedValueProp); // Update context with fetched value proposition
-      setCurrentChars(fetchedValueProp.length); // Set current character count
-      updatePromptRating(fetchedValueProp.length); // Update prompt rating based on fetched value proposition length
+      setValueProp(fetchedValueProp);
+      setCurrentChars(fetchedValueProp.length);
+      updatePromptRating(fetchedValueProp.length);
     };
 
     fetchValueProp();
@@ -61,12 +61,11 @@ const ValueProp: React.FC<ValuePropProps> = ({
     return new Promise<string>((resolve, reject) => {
       setTimeout(() => {
         const valuePropMap: Record<string, string> = {
-          '12345678': 'Experienced financial advisor dedicated to guiding individuals and families with confidence. Specialized in wealth management, retirement planning, investments, and risk management.',
-          // Add more mappings as needed
+          '123': 'Your saved value proposition goes here...',
         };
         const fetchedValueProp = valuePropMap[valuePropId] || '';
         resolve(fetchedValueProp);
-      }, 1000); // Simulate 1 second delay
+      }, 1000);
     });
   };
 
@@ -75,19 +74,21 @@ const ValueProp: React.FC<ValuePropProps> = ({
     setValuePropState(newValueProp);
     onValuePropChange(newValueProp);
 
-    setCurrentChars(newValueProp.length); // Update current character count
-    updatePromptRating(newValueProp.length); // Update prompt rating based on new value proposition length
+    setCurrentChars(newValueProp.length);
+    updatePromptRating(newValueProp.length);
   };
 
   const updatePromptRating = (length: number) => {
     if (length === 0) {
-      setPromptRating('poor');
-    } else if (length < 50) {
-      setPromptRating('poor');
+      setPromptGenerated(false);
+    }
+
+    if (length < 50) {
+      setPromptGenerated(false);
     } else if (length >= 50 && length < 150) {
-      setPromptRating('ok');
+      setPromptGenerated(true);
     } else {
-      setPromptRating('good');
+      setPromptGenerated(true);
     }
   };
 
@@ -109,7 +110,7 @@ const ValueProp: React.FC<ValuePropProps> = ({
         role,
         description,
         interests,
-        userId // Pass userId as part of the prompt generation
+        userId
       );
 
       const response = await fetchOpenAIResponse(valuePropPrompt);
@@ -155,32 +156,28 @@ const ValueProp: React.FC<ValuePropProps> = ({
           id="value-prop"
           value={valueProp}
           onChange={handleValuePropChange}
-          className="border rounded-lg p-2 w-full text-navyblue" // Text color navyblue
-          rows={5}
-          maxLength={200} // Set the maximum character limit
-          style={{ backgroundColor: 'white' }}
+          className="border rounded-lg p-2 w-full h-40 text-navyblue resize-none"
+          style={{ backgroundColor: 'white', minHeight: '120px' }}
+          placeholder="Describe your value proposition here..."
         ></textarea>
-        <p className={getColorForRating(promptRating)}>
-          {promptRating === 'poor' ? 'Value Prop is too short!' : promptRating === 'ok' ? 'Value Prop is ok!' : 'Value Prop is great!'}
-        </p>
-        <p className={getColorForRating(promptRating)}>
-          {currentChars}/200 characters entered
+        <p className={getColorForRating(currentChars < maxChars ? 'poor' : currentChars < 150 ? 'ok' : 'good')}>
+          {currentChars}/{maxChars} characters entered
         </p>
       </div>
-      <div>
-        <button onClick={generatePromptWithAI} className="bg-navyblue text-white px-4 py-2 rounded-md mr-2">
-          Create
+      <div className="flex items-center justify-between">
+        <button onClick={generatePromptWithAI} className="bg-navyblue text-white px-4 py-2 rounded-md">
+          Generate Prompt
         </button>
-        {promptGenerated && (
-          <>
-            <h3 className="text-lg font-semibold mt-4 text-navyblue">Your Value Proposition</h3>
-            <p className="text-black">{prompt}</p>
-            <button onClick={handleSave} className="bg-green-500 text-white px-4 py-2 rounded-md mr-2">
-              Save
-            </button>
-          </>
-        )}
+        <button onClick={handleSave} className="bg-green-500 text-white px-4 py-2 rounded-md">
+          Save
+        </button>
       </div>
+      {promptGenerated && (
+        <div>
+          <h3 className="text-lg font-semibold mt-4 text-navyblue">Generated Prompt</h3>
+          <p className="text-black">{prompt}</p>
+        </div>
+      )}
     </div>
   );
 };

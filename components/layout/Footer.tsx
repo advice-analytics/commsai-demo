@@ -20,7 +20,7 @@ const Footer: React.FC = () => {
             />
           </Link>
           <span className="ml-4">
-            <Link href="/terms" className="text-gray-600 hover:text-navyblue underline">
+            <Link href="https://adviceanalytics.com/legal/terms-of-service/" className="text-navyblue hover:text-navyblue underline">
               Disclosure of Terms
             </Link>
           </span>
