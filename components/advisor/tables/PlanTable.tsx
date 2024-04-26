@@ -1,92 +1,136 @@
-// components/PlanTable.tsx
-import React from 'react';
+'use client'
+
+import React, { useState, useEffect } from 'react';
 import { Plan } from '@/types/PlanTypes';
+import { Participant } from '@/types/ParticipantTypes';
 
 interface PlanTableProps {
   plans: Plan[];
   onPlanSelect: (plan: Plan) => void;
+  onHealthClick: (plan: Plan) => void;
 }
 
-const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanSelect }) => {
-  const containerStyle: React.CSSProperties = {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    color: 'black',
-    textAlign: 'center',
-    padding: '20px',
+const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanSelect, onHealthClick }) => {
+  const [isMobileView, setIsMobileView] = useState<boolean>(false);
+
+  const calculateParticipantsCount = (participants: Participant[] | undefined): number => {
+    return participants ? participants.length : 0;
   };
 
-  const tableTitleStyle: React.CSSProperties = {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    marginBottom: '20px',
-    color: '#144e74',
+  const checkScreenWidth = () => {
+    setIsMobileView(window.innerWidth < 768); // Adjust breakpoint as needed
   };
 
-  const tableStyle: React.CSSProperties = {
-    width: '100%',
-    borderCollapse: 'collapse',
+  const calculateSummary = (plans: Plan[]) => {
+    const totalPlans = plans.length;
+    const totalAssets = plans.reduce((sum, plan) => sum + parseFloat(plan.assets.replace(/[$,]/g, '')), 0);
+    const totalParticipants = plans.reduce((sum, plan) => sum + (plan.participants ? plan.participants.length : 0), 0);
+  
+    return {
+      totalPlans,
+      totalAssets,
+      totalParticipants,
+    };
   };
-
-  const tableHeaderStyle: React.CSSProperties = {
-    backgroundColor: '#144e74',
-    color: 'white',
-    textAlign: 'center',
-    padding: '10px',
-    border: '1px solid #ccc',
-    verticalAlign: 'middle',
-  };
-
-  const tableRowStyle: React.CSSProperties = {
-    borderBottom: '1px solid #ccc',
-  };
-
-  const cellStyle: React.CSSProperties = {
-    padding: '12px',
-    borderBottom: '1px solid #ccc',
-  };
-
-  const selectButtonStyle: React.CSSProperties = {
-    padding: '8px 16px',
-    borderRadius: '5px',
-    background: '#144e74',
-    color: 'white',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'background 0.3s, color 0.3s',
-  };
-
+  
+  const summary = calculateSummary(plans);
+  
+  useEffect(() => {
+    window.addEventListener('resize', checkScreenWidth);
+    checkScreenWidth();
+  
+    return () => {
+      window.removeEventListener('resize', checkScreenWidth);
+    };
+  }, []);
+  
   return (
-    <div style={containerStyle}>
-      <h2 style={tableTitleStyle}>Data Table</h2>
-      <table style={tableStyle}>
-        <thead>
-          <tr style={tableHeaderStyle}>
-            <th>Plan</th>
-            <th>Assets</th>
-            <th>Participants</th>
-            <th>Health</th>
-            <th>Select</th>
-          </tr>
-        </thead>
-        <tbody>
-          {plans.map((plan) => (
-            <tr key={plan.id} style={tableRowStyle}>
-              <td style={cellStyle}>{plan.planName}</td>
-              <td style={cellStyle}>{plan.assets}</td>
-              <td style={cellStyle}>{plan.participants.length}</td>
-              <td style={cellStyle}>{plan.health}</td>
-              <td style={cellStyle}>
-                <button style={selectButtonStyle} onClick={() => onPlanSelect(plan)}>
-                  Select
-                </button>
-              </td>
+    <div
+      style={{
+        maxWidth: '100%',
+        overflowX: 'auto',
+        color: 'black',
+        padding: '20px',
+      }}
+    >
+      {/* Display summary information */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-around',
+          alignItems: 'center',
+          marginBottom: '20px',
+          fontSize: '16px',
+          fontWeight: 'bold',
+          color: '#144e74',
+        }}
+      >
+        <p>Total Plans: {summary.totalPlans}</p>
+        <p>Total Assets: ${summary.totalAssets.toLocaleString()}</p>
+        <p>Total Participants: {summary.totalParticipants}</p>
+      </div>
+  
+      {/* Table container with horizontal scrollbar */}
+      <div
+        style={{
+          overflowX: 'auto',
+          border: '1px solid #ccc',
+          borderRadius: '5px',
+        }}
+      >
+        {/* Plan Table */}
+        <table
+          style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+          }}
+        >
+          {/* Table header */}
+          <thead>
+            <tr style={{ backgroundColor: '#144e74', color: 'white', textAlign: 'center' }}>
+              <th style={{ padding: '10px', border: '1px solid #ccc', whiteSpace: 'nowrap' }}>Plan</th>
+              {!isMobileView && <th style={{ padding: '10px', border: '1px solid #ccc', whiteSpace: 'nowrap' }}>Assets</th>}
+              {!isMobileView && <th style={{ padding: '10px', border: '1px solid #ccc', whiteSpace: 'nowrap' }}>Participants</th>}
+              <th style={{ padding: '10px', border: '1px solid #ccc', whiteSpace: 'nowrap' }}>Health</th>
+              <th style={{ padding: '10px', border: '1px solid #ccc', whiteSpace: 'nowrap' }}>Select</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {plans.map((plan) => (
+              <tr key={plan.planName} style={{ borderBottom: '1px solid #ccc', whiteSpace: 'nowrap' }}>
+                <td style={{ padding: '12px', textAlign: 'center' }}>{plan.planName}</td>
+                {!isMobileView && <td style={{ padding: '12px', textAlign: 'center' }}>{plan.assets}</td>}
+                {!isMobileView && (
+                  <td style={{ padding: '12px', textAlign: 'center' }}>{plan.participants ? plan.participants.length : 0}</td>
+                )}
+                <td style={{ padding: '12px', textAlign: 'center' }}>
+                  <span
+                    style={{
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                      color: '#144e74',
+                    }}
+                    onClick={() => onHealthClick(plan)}
+                  >
+                    {plan.health}
+                  </span>
+                </td>
+                <td style={{ padding: '12px', textAlign: 'center' }}>
+                  <button
+                    style={{ cursor: 'pointer', backgroundColor: '#144e74', color: 'white', border: 'none', borderRadius: '5px', padding: '8px 12px' }}
+                    onClick={() => onPlanSelect(plan)}
+                  >
+                    Select
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-};
-
-export default PlanTable;
+  };
+  
+  export default PlanTable; 
+  

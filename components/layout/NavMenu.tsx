@@ -10,7 +10,6 @@ import HeaderNavLink from './HeaderNavLink';
 
 const menuItems = [
   { label: `Advisor`, url: `advisor` },
-  { label: `Admin`, url: `admin` },
   { label: 'Log out', url: '/' },
 ];
 
@@ -37,12 +36,12 @@ const NavMenu: React.FC<NavMenuProps> = ({}) => {
     <Disclosure as='nav' className={`bg-black shadow ${isScrolled ? 'sticky-header' : ''}`}>
       {({ open }) => (
         <>
-          <div className='mx-auto max-w-7xl px-2 sm:px-4 lg:px-8'>
+          <div className='mx-auto max-w-8xl px-2 sm:px-4 lg:px-8'>
             <div className='flex h-16 justify-between'>
               <div className='flex px-2 lg:px-0 items-center'>
                 <Link href="/">
                   <NextImage
-                    className='h-8 w-auto'
+                    className='h-12 w-auto'
                     src={LogoImage}
                     alt=''
                     width={300}

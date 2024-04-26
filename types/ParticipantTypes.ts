@@ -1,30 +1,44 @@
+// ParticipantTypes.ts
+
+// Define the Score interface
+export interface Score {
+  category: string;
+  score: number;
+}
+
+// Define the Participant interface
 export interface Participant {
-  id: number;
+  id: string;
   name: string;
-  age: number;
   balance: number;
-  need: string;
-  plan: string;
-  employer: string;
-  retirement: number;
-  financial: number;
-  tax: number;
-  investment: number;
-  estate: number;
-  other: number;
-  incomeFrom?: number; // Add incomeFrom property
-  incomeTo?: number; // Add incomeTo property
-  balanceFrom?: number; // Add balanceFrom property
-  balanceTo?: number; // Remove this if not needed, or use balance instead
+  age: number;
+  state: string;
+  maritalStatus: string;
+  hasBalance?: number;
+  glidePath?: string;
+  planReturns?: string;
+  savingsRatePercent?: number;
+  gender?: string;
+  salary?: number;
+  retirement: number;   // Add retirement property
+  financial: number;    // Add financial property
+  tax: number;          // Add tax property
+  investment: number;   // Add investment property
+  estate: number;       // Add estate property
+  planId: string;
+  planName: string; // Add planName property  // Add planId property
+  scores: {
+    [key: string]: number;
+  };
   clients?: Client[];
 }
 
-export interface Client {
-  name: string;
-  retirement: number;
-  financial: number;
-  tax: number;
-  investment: number;
-  estate: number;
-  other: number;
+// Define the Client interface as a subtype of Participant
+export interface Client extends Participant {}
+
+// Define the ParticipantWithScores interface
+export interface ParticipantWithScores extends Participant {
+  scores: {
+    [key: string]: number;
+  };
 }

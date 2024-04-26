@@ -1,13 +1,11 @@
-// SharedTableStyles.ts
-
+// SharedStyles.tsx
 import { CSSProperties } from 'react';
 
 export const sharedTableStyles = {
   container: {
-    maxWidth: '1200px',
-    margin: '0 auto',
+    maxWidth: '100%',
+    overflowX: 'auto',
     color: 'black',
-    textAlign: 'center',
     padding: '20px',
   } as CSSProperties,
   table: {
@@ -21,14 +19,16 @@ export const sharedTableStyles = {
     padding: '10px',
     border: '1px solid #ccc',
     verticalAlign: 'middle',
-    width: '100%',
+    whiteSpace: 'nowrap',
   } as CSSProperties,
   tableRow: {
     borderBottom: '1px solid #ccc',
+    whiteSpace: 'nowrap',
   } as CSSProperties,
   cell: {
     padding: '12px',
     borderBottom: '1px solid #ccc',
+    whiteSpace: 'nowrap',
   } as CSSProperties,
   selectButton: {
     padding: '8px 16px',
@@ -49,6 +49,7 @@ export const sharedTableStyles = {
     backgroundColor: '#144e74',
     color: 'white',
     textAlign: 'center',
+    whiteSpace: 'nowrap',
   } as CSSProperties,
   blueRowHover: {
     backgroundColor: '#144e74',
@@ -60,6 +61,22 @@ export const sharedTableStyles = {
     textAlign: 'center',
     verticalAlign: 'middle',
     whiteSpace: 'nowrap',
-    /* Add specific styles for header cells in ClientTable */
+  } as CSSProperties,
+  summaryContainer: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginBottom: '20px',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    color: '#144e74',
+  } as CSSProperties,
+  mobileContainer: {
+    overflowX: 'auto',
+    maxWidth: '100%',
+    padding: '10px',
+    boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+    borderRadius: '5px',
+    marginBottom: '20px',
   } as CSSProperties,
 };

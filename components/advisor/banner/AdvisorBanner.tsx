@@ -1,9 +1,10 @@
-
 'use client'
+
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { auth } from '@/utilities/firebaseClient';
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import AdvisorInfo from './AdvisorInfo';
 import ValuePropPopup from '../value/ValuePropPopup';
 import ValueProp from '../value/ValueProp';
 
@@ -15,13 +16,14 @@ const serviceCategories = [
   { name: 'Estate Plans', icon: 'estate-light.svg' },
 ];
 
-const storage = getStorage(); // Initialize Firebase Storage
+const storage = getStorage();
 
 const AdvisorBanner: React.FC = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
   const [valuePropId, setValuePropId] = useState<string>('');
   const [showValuePropPopup, setShowValuePropPopup] = useState<boolean>(false);
+  const [showAdvisorInfo, setShowAdvisorInfo] = useState<boolean>(false);
   const [loadingProfile, setLoadingProfile] = useState<boolean>(true);
 
   useEffect(() => {
@@ -31,13 +33,13 @@ const AdvisorBanner: React.FC = () => {
         const uidString = user.uid.toString();
         const lastFiveDigits = uidString.slice(-5);
         const commsId = lastFiveDigits.toUpperCase().padStart(5, '0');
-        setValuePropId(commsId); // Set the value proposition ID based on the last five digits of UID
-        loadProfilePicture(uidString); // Load profile picture based on user's UID
+        setValuePropId(commsId);
+        loadProfilePicture(uidString);
       } else {
         setUserEmail(null);
         setValuePropId('');
-        setProfilePictureUrl(null); // Clear profile picture URL when user logs out
-        setLoadingProfile(false); // Set loading to false when user is not authenticated
+        setProfilePictureUrl(null);
+        setLoadingProfile(false);
       }
     });
     return () => unsubscribe();
@@ -45,15 +47,15 @@ const AdvisorBanner: React.FC = () => {
 
   const loadProfilePicture = async (uid: string) => {
     try {
-      const storageRefPath = `profilePictures/${uid}.png`; // Construct storage reference path
+      const storageRefPath = `profilePictures/${uid}.png`;
       const storageReference = storageRef(storage, storageRefPath);
       const downloadUrl = await getDownloadURL(storageReference);
       setProfilePictureUrl(downloadUrl);
-      setLoadingProfile(false); // Profile picture loaded, set loading to false
+      setLoadingProfile(false);
     } catch (error) {
       console.error('Error loading profile picture:', error);
       setProfilePictureUrl(null);
-      setLoadingProfile(false); // Profile picture failed to load, set loading to false
+      setLoadingProfile(false);
     }
   };
 
@@ -67,7 +69,9 @@ const AdvisorBanner: React.FC = () => {
           return;
         }
 
-        const storageRefPath = `profilePictures/${uid}.png`; // Use UID in storage path
+        setLoadingProfile(true);
+
+        const storageRefPath = `profilePictures/${uid}.png`;
         const storageReference = storageRef(storage, storageRefPath);
         const uploadTask = uploadBytesResumable(storageReference, file);
 
@@ -76,19 +80,23 @@ const AdvisorBanner: React.FC = () => {
           null,
           (error: any) => {
             console.error('Error uploading profile picture:', error);
+            setLoadingProfile(false);
           },
           async () => {
             try {
               const downloadUrl = await getDownloadURL(storageReference);
               setProfilePictureUrl(downloadUrl);
+              setLoadingProfile(false);
               console.log('Profile picture uploaded successfully!');
             } catch (error) {
               console.error('Error getting download URL:', error);
+              setLoadingProfile(false);
             }
           }
         );
       } catch (error) {
         console.error('Error uploading profile picture:', error);
+        setLoadingProfile(false);
       }
     }
   };
@@ -101,125 +109,68 @@ const AdvisorBanner: React.FC = () => {
     setShowValuePropPopup(false);
   };
 
-  if (loadingProfile) {
-    return <div>Loading...</div>; // Render a loading message while profile data is loading
-  }
+  const handleGearIconClick = () => {
+    setShowAdvisorInfo(true);
+  };
 
   return (
-    <div className="advisor-banner">
-      <div className="profile-section">
-        <div className="profile-picture" onClick={() => document.getElementById('profile-picture-input')?.click()}>
-          {profilePictureUrl ? (
-            <Image src={profilePictureUrl} alt="Profile" width={100} height={100} />
+    <div className="advisor-banner bg-blue-900 text-white p-4 rounded-md shadow-md">
+      <div className="profile-section flex justify-between items-center w-full mb-4">
+        <div className="profile-picture relative cursor-pointer" onClick={() => document.getElementById('profile-picture-input')?.click()}>
+          {loadingProfile ? (
+            <div className="loading-spinner absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">Updating</div>
           ) : (
-            <Image src="/addphoto.png" alt="Profile Picture" width={150} height={150} priority />
+            <>
+              {profilePictureUrl ? (
+                <Image src={profilePictureUrl} alt="Profile" width={100} height={100} layout="fixed" />
+              ) : (
+                <Image src="/addphoto.png" alt="Profile Picture" width={100} height={100} layout="fixed" priority />
+              )}
+            </>
           )}
           <input
             type="file"
             id="profile-picture-input"
             accept="image/jpeg, image/png"
-            style={{ display: 'none' }}
+            className="hidden"
             onChange={handleFileInputChange}
           />
         </div>
-        <div className="advisor-info">
-          <div className="username">{userEmail}</div>
-          <div className="commsid">
-            Your CommsID: <span className="valuePropId">{valuePropId}</span>
-          </div>
-          <div className="value-prop-link" onClick={handleValuePropClick}>
-            <u>Value Proposition</u>
-          </div>
+        <div className="advisor-info text-right">
+          <div className="username text-yellow-300 text-sm">{userEmail}</div>
+          <div className="commsid text-sm text-white">Your CommsID: <span className="valuePropId text-green-400">{valuePropId}</span></div>
+          <div className="value-prop-link text-sm cursor-pointer underline" onClick={handleValuePropClick}>Value Proposition</div>
         </div>
-        <div className="gear-icon" onClick={() => console.log('Settings clicked')}>
+        <div className="gear-icon cursor-pointer" onClick={handleGearIconClick}>
           <Image src="/gear.png" alt="Settings" width={30} height={30} />
         </div>
       </div>
       <div className="service-section-container">
-        <div className="service-section">
+        <div className="service-section flex flex-wrap justify-center">
           {serviceCategories.map((category, index) => (
-            <div key={index} className="service-category">
+            <div key={index} className="service-category text-white rounded-md mr-2 mb-2">
               {category.name}
             </div>
           ))}
         </div>
       </div>
       {showValuePropPopup && (
-        <ValuePropPopup onClose={handleCloseValuePropPopup}>
+        <ValuePropPopup onClose={handleCloseValuePropPopup} valueProp="Load value">
           <ValueProp
-            valuePropId={valuePropId}
             userId={auth.currentUser?.uid || ''}
-            ageGroup="30-45"
-            role="Financial Advisor"
-            description="I help clients plan and manage their finances."
-            interests={['Investing', 'Retirement Planning']}
             onValuePropChange={(newValueProp) => {
               // Handle changes to the value proposition here if needed
             }}
           />
         </ValuePropPopup>
       )}
-      <style jsx>{`
-        .advisor-banner {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          padding: 20px;
-          background-color: #144e74;
-          border-radius: 5px;
-          color: #fff;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        .profile-section {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          width: 100%;
-          margin-bottom: 20px;
-        }
-        .profile-picture {
-          position: relative;
-          cursor: pointer;
-        }
-        .advisor-info {
-          font-size: 12px;
-        }
-        .username {
-          font-size: 10px;
-          color: #f8c239;
-        }
-        .commsid {
-          font-size: 10px;
-          color: #fff;
-        }
-        .gear-icon {
-          cursor: pointer;
-          align-self: flex-start;
-          margin-top: -5px; /* Adjust the margin as needed */
-        }
-        .value-prop-link {
-          font-size: 10px;
-          margin-top: 8px;
-        }
-        .service-section-container {
-          display: flex;
-          justify-content: center;
-          width: 100%;
-        }
-        .service-section {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          gap: 4px;
-        }
-        .service-category {
-          font-size: 10px;
-          color: #fff;
-          background-color: #144e74;
-          padding: 4px;
-          border-radius: 4px;
-        }
-      `}</style>
+      {showAdvisorInfo && (
+        <AdvisorInfo
+          userEmail={userEmail}
+          valuePropId={valuePropId}
+          onClose={() => setShowAdvisorInfo(false)}
+        />
+      )}
     </div>
   );
 };

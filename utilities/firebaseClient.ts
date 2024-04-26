@@ -14,7 +14,10 @@ import {
   ref as dbRef,
   push,
   set,
+  remove,
   Database,
+  DataSnapshot,
+  get,
 } from 'firebase/database';
 import {
   getStorage,
@@ -97,14 +100,46 @@ const completeSignInWithEmailLink = async (email: string, url: string) => {
   }
 };
 
-// Function to save value proposition to Firebase Realtime Database
 const saveValuePropToDatabase = async (uid: string, valueProp: string): Promise<void> => {
   try {
-    const valuePropRef = dbRef(database, `users/${uid}/valueProps`);
-    const newPropRef = push(valuePropRef); // Create a new child node
-    await set(newPropRef, { value: valueProp }); // Save value proposition under the new child node
+    const valuePropRef = dbRef(database, `users/${uid}/valueProp`);
+    const dataSnapshot = await get(valuePropRef);
+
+    if (dataSnapshot.exists()) {
+      // Value proposition already exists for the user, update it
+      await set(valuePropRef, { value: valueProp });
+    } else {
+      // Value proposition does not exist, create a new one
+      await set(valuePropRef, { value: valueProp });
+    }
   } catch (error: any) {
     console.error('Error saving value proposition to database:', error.message);
+    throw error;
+  }
+};
+
+// Function to get value proposition from Firebase Realtime Database
+const getValuePropFromDatabase = async (uid: string): Promise<string> => {
+  try {
+    const valuePropRef = dbRef(database, `users/${uid}/valueProps`);
+    const dataSnapshot: DataSnapshot = await get(valuePropRef);
+    const valuePropData = dataSnapshot.val();
+
+    // If value proposition exists, return it, otherwise return an empty string
+    return valuePropData ? valuePropData.value : '';
+  } catch (error: any) {
+    console.error('Error getting value proposition from database:', error.message);
+    throw error;
+  }
+};
+
+// Function to delete campaign data from Firebase Realtime Database
+const deleteCampaignFromDatabase = async (uid: string, campaignId: string): Promise<void> => {
+  try {
+    const campaignRef = dbRef(database, `users/${uid}/campaigns/`);
+    await remove(campaignRef); // Remove the campaign node from the database
+  } catch (error: any) {
+    console.error('Error deleting campaign data from database:', error.message);
     throw error;
   }
 };
@@ -177,6 +212,8 @@ export {
   sendSignInEmailLink,
   completeSignInWithEmailLink,
   saveValuePropToDatabase,
+  getValuePropFromDatabase,
+  deleteCampaignFromDatabase,
   saveCampaignToDatabase,
   uploadProfilePicture,
   getProfilePictureURL,

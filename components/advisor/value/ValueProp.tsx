@@ -1,148 +1,71 @@
-'use client';
+'use client'
 
 import React, { useState, useEffect } from 'react';
-import { useValuePropContext } from '../../context/ValuePropContext';
-import { generateValuePropPrompt } from '@/utilities/promptGenAI';
-import { saveValuePropToDatabase } from '@/utilities/firebaseClient';
-import { openaiApiKey } from '@/constants/env';
+import { saveValuePropToDatabase, getValuePropFromDatabase } from '@/utilities/firebaseClient';
+import { useAuth } from '@/components/context/authContext'; // Import useAuth hook and UserData type
 
 interface ValuePropProps {
-  onValuePropChange: (newValueProp: string) => void;
-  valuePropId: string;
   userId: string;
-  ageGroup: string;
-  role: string;
-  description: string;
-  interests: string[];
+  onValuePropChange: (newValueProp: string) => void;
 }
 
-const getColorForRating = (rating: 'poor' | 'ok' | 'good') => {
-  switch (rating) {
-    case 'poor':
-      return 'text-red-500';
-    case 'ok':
-      return 'text-yellow-500';
-    case 'good':
-      return 'text-green-500';
-    default:
-      return 'text-gray-500';
-  }
-};
-
-const ValueProp: React.FC<ValuePropProps> = ({
-  onValuePropChange,
-  valuePropId,
-  userId,
-  ageGroup,
-  role,
-  description,
-  interests,
-}) => {
-  const { setValueProp } = useValuePropContext();
-  const [promptGenerated, setPromptGenerated] = useState(false);
-  const [prompt, setPrompt] = useState('');
-  const [valueProp, setValuePropState] = useState('');
+const ValueProp: React.FC<ValuePropProps> = ({ onValuePropChange }) => {
+  const [valueProp, setValueProp] = useState('');
   const [currentChars, setCurrentChars] = useState(0);
-  const maxChars = 250;
+  const [maxChars] = useState(250);
+  const [loading, setLoading] = useState(true);
+
+  const [userData] = useAuth(); // Retrieve userData from AuthContext
+  const userId = userData.uid || ''; // Extract userId from userData or default to empty string
 
   useEffect(() => {
     const fetchValueProp = async () => {
-      const fetchedValueProp = await getValuePropFromDatabase(valuePropId);
-      setValuePropState(fetchedValueProp);
-      setValueProp(fetchedValueProp);
-      setCurrentChars(fetchedValueProp.length);
-      updatePromptRating(fetchedValueProp.length);
+      try {
+        const fetchedValueProp = await getValuePropFromDatabase(userId);
+
+        if (fetchedValueProp !== undefined) {
+          setValueProp(fetchedValueProp); // Set valueProp to fetched value
+          setCurrentChars(fetchedValueProp.length);
+        } else {
+          setValueProp(''); // Set valueProp to empty string if fetchedValueProp is undefined
+          setCurrentChars(0);
+        }
+
+        setLoading(false); // Update loading state to indicate data has been fetched
+      } catch (error) {
+        console.error('Error fetching value proposition:', error);
+        setLoading(false); // Update loading state even on error
+      }
     };
 
-    fetchValueProp();
-  }, [valuePropId]);
-
-  const getValuePropFromDatabase = async (valuePropId: string): Promise<string> => {
-    return new Promise<string>((resolve, reject) => {
-      setTimeout(() => {
-        const valuePropMap: Record<string, string> = {
-          '123': 'Your saved value proposition goes here...',
-        };
-        const fetchedValueProp = valuePropMap[valuePropId] || '';
-        resolve(fetchedValueProp);
-      }, 1000);
-    });
-  };
-
-  const handleValuePropChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newValueProp = event.target.value;
-    setValuePropState(newValueProp);
-    onValuePropChange(newValueProp);
-
-    setCurrentChars(newValueProp.length);
-    updatePromptRating(newValueProp.length);
-  };
-
-  const updatePromptRating = (length: number) => {
-    if (length === 0) {
-      setPromptGenerated(false);
-    }
-
-    if (length < 50) {
-      setPromptGenerated(false);
-    } else if (length >= 50 && length < 150) {
-      setPromptGenerated(true);
-    } else {
-      setPromptGenerated(true);
-    }
-  };
+    fetchValueProp(); // Invoke fetchValueProp on component mount
+  }, [userId]); // Re-run effect when userId changes
 
   const handleSave = async () => {
     try {
       await saveValuePropToDatabase(userId, valueProp);
-      alert('Value proposition saved!');
+      alert('Value proposition saved successfully!');
     } catch (error) {
       console.error('Error saving value proposition:', error);
+      alert('Failed to save value proposition. Please try again.');
     }
   };
 
-  const generatePromptWithAI = async () => {
-    if (!valueProp) return;
-
-    try {
-      const valuePropPrompt: string = await generateValuePropPrompt(
-        ageGroup,
-        role,
-        description,
-        interests,
-        userId
-      );
-
-      const response = await fetchOpenAIResponse(valuePropPrompt);
-      const generatedAssistantMessage = response?.choices?.[0]?.message?.content || '';
-
-      setPrompt(generatedAssistantMessage);
-      setPromptGenerated(true);
-    } catch (error) {
-      console.error('Error generating prompt with AI:', error);
-    }
+  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValueProp = event.target.value;
+    setValueProp(newValueProp);
+    onValuePropChange(newValueProp);
+    setCurrentChars(newValueProp.length);
   };
 
-  const fetchOpenAIResponse = async (prompt: string) => {
-    const payload = {
-      model: 'gpt-3.5-turbo-0125',
-      messages: [{ role: 'assistant', content: prompt }],
-    };
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${openaiApiKey}`,
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      throw new Error('OpenAI API request failed');
+  const getColorForRating = (chars: number): string => {
+    if (chars < maxChars * 0.5) {
+      return 'text-red-500';
+    } else if (chars < maxChars * 0.8) {
+      return 'text-yellow-500';
+    } else {
+      return 'text-green-500';
     }
-
-    return await response.json();
   };
 
   return (
@@ -155,29 +78,24 @@ const ValueProp: React.FC<ValuePropProps> = ({
         <textarea
           id="value-prop"
           value={valueProp}
-          onChange={handleValuePropChange}
+          onChange={handleChange}
           className="border rounded-lg p-2 w-full h-40 text-navyblue resize-none"
           style={{ backgroundColor: 'white', minHeight: '120px' }}
           placeholder="Describe your value proposition here..."
         ></textarea>
-        <p className={getColorForRating(currentChars < maxChars ? 'poor' : currentChars < 150 ? 'ok' : 'good')}>
+        <p className={getColorForRating(currentChars)}>
           {currentChars}/{maxChars} characters entered
         </p>
       </div>
       <div className="flex items-center justify-between">
-        <button onClick={generatePromptWithAI} className="bg-navyblue text-white px-4 py-2 rounded-md">
-          Generate Prompt
-        </button>
-        <button onClick={handleSave} className="bg-green-500 text-white px-4 py-2 rounded-md">
+        <button
+          onClick={handleSave}
+          disabled={loading}
+          className="bg-green-500 text-white px-4 py-2 rounded-md"
+        >
           Save
         </button>
       </div>
-      {promptGenerated && (
-        <div>
-          <h3 className="text-lg font-semibold mt-4 text-navyblue">Generated Prompt</h3>
-          <p className="text-black">{prompt}</p>
-        </div>
-      )}
     </div>
   );
 };

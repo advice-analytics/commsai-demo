@@ -5,7 +5,9 @@ name = "pypi"
 
 [packages]
 fastapi = "==0.100.1"
-uvicorn = {extras = ["standard"], version = "==0.23.2"}
+uvicorn = { version = "==0.23.2", extras = ["standard"] }
+pydantic = "==1.8.2"
+sqlalchemy = "==1.4.31"
 
 [dev-packages]
 

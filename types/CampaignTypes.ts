@@ -1,18 +1,34 @@
-// types/CampaignTypes.ts
+// Define the Participant interface
+// Define the Participant interface with optional properties
+export interface Participant {
+  id: string;
+  name: string;
+  balance: number;
+  age: number;
+  state: string;
+  maritalStatus: string;
+  scores: {
+    [key: string]: number;
+  };
+  hasBalance?: number;
+  glidePath?: string;
+  planReturns?: string;
+  savingsRatePercent?: number;
+  gender?: string;
+  salary?: number;
+}
 
-// Define an interface for a Campaign
+
+// Define the Campaign interface
 export interface Campaign {
+  plan: string;
   id: string;
   name: string;
   type: string;
   ageGroup: string;
   prompt?: string;
-  userId?: string; // Add userId as an optional property
-  // Optional field for generated prompt
-}
-
-// Define an interface for a Participant (assuming it's used within campaigns)
-export interface Participant {
-  age: number;
-  // Adjusted participant fields based on usage
+  userId?: string;
+  selectedPlan?: string;
+  participant: Participant;
+  planName: string; // Participant data within the campaign
 }

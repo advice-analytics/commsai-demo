@@ -6,6 +6,5 @@ export interface Client {
     tax: number;
     investment: number;
     estate: number;
-    other: number;
   }
   

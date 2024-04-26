@@ -3,9 +3,10 @@ import React from 'react';
 interface ValuePropPopupProps {
   children: React.ReactNode;
   onClose: () => void;
+  valueProp: string; // Define a prop to receive the value proposition
 }
 
-const ValuePropPopup: React.FC<ValuePropPopupProps> = ({ children, onClose }) => {
+const ValuePropPopup: React.FC<ValuePropPopupProps> = ({ children, onClose, valueProp }) => {
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Check if the click occurred on the overlay (outside the popup content)
     if (e.target === e.currentTarget) {
@@ -30,7 +31,11 @@ const ValuePropPopup: React.FC<ValuePropPopupProps> = ({ children, onClose }) =>
             </svg>
           </button>
         </div>
-        <div className="popup-body">{children}</div>
+        <div className="popup-body">
+          {/* Display the value proposition inside the popup */}
+          <p>{valueProp}</p>
+          {children}
+        </div>
       </div>
       <style jsx>{`
         .value-prop-popup {

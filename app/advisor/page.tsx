@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import React, { useState, useEffect } from 'react';
 import AdvisorBanner from '@/components/advisor/banner/AdvisorBanner';
@@ -7,8 +7,9 @@ import ParticipantTable from '@/components/advisor/tables/ParticipantTable';
 import ClientTable from '@/components/advisor/tables/ClientTable';
 import ValueProp from '@/components/advisor/value/ValueProp';
 import Campaigns from '@/components/campaigns/Campaigns';
-import { ValuePropProvider } from '@/components/context/ValuePropContext';
-import { Plan, Participant, Client } from '@/types/PlanTypes';
+import PlanHealth from '@/components/health/PlanHealth'; // Import PlanHealth component
+import { Plan, Client } from '@/types/PlanTypes';
+import { Participant } from '@/types/ParticipantTypes';
 import { useAuth } from '@/components/context/authContext';
 
 interface NavigationItem {
@@ -19,8 +20,8 @@ interface NavigationItem {
 
 const Page: React.FC = () => {
   const [navigationItems] = useState<NavigationItem[]>([
-    { id: 1, label: 'Plans' },
-    { id: 2, label: 'Campaigns' },
+    { id: 1, label: 'All Plans' },
+    { id: 2, label: 'Plan Campaigns' },
     { id: 3, label: 'Coming Soon...', disabled: true },
     { id: 4, label: 'Coming Soon...', disabled: true },
   ]);
@@ -29,59 +30,40 @@ const Page: React.FC = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [isHealthModalOpen, setHealthModalOpen] = useState(false); // State for health modal
 
   const [userData, setUser] = useAuth(); // Retrieve user data from authentication context
   const userUid: string = userData?.uid || ''; // Obtain user UID from user data
 
   useEffect(() => {
+    const fetchParticipants = async () => {
+      try {
+        const response = await fetch('/api/participants'); // Fetch all participants
+        if (!response.ok) {
+          throw new Error('Failed to fetch participants');
+        }
+        const participantsData: Participant[] = await response.json();
+        setParticipants(participantsData);
+      } catch (error) {
+        console.error('Error fetching participants:', error);
+      }
+    };
+
     const fetchPlans = async () => {
       try {
-        // Simulated plans data
-        const mockPlans: Plan[] = [
-          {
-            id: 1,
-            planName: 'Plan A',
-            assets: 'High',
-            participants: [
-              {
-                id: 1,
-                name: 'John Doe',
-                age: 45,
-                balance: 150000,
-                need: 'High',
-                plan: 'Plan A',
-                employer: 'ABC Inc.',
-                retirement: 92,
-                financial: 78,
-                tax: 82,
-                investment: 48,
-                estate: 76,
-                other: 14,
-                clients: [
-                  {
-                    name: 'Client 1',
-                    retirement: 92,
-                    financial: 78,
-                    tax: 82,
-                    investment: 48,
-                    estate: 76,
-                    other: 14,
-                  },
-                  // Add more clients...
-                ],
-              },
-              // Add more participants...
-            ],
-            health: 'Good',
-          },
-          // Add more plans...
-        ];
-        setPlans(mockPlans);
+        const response = await fetch('/api/plans'); // Fetch plans endpoint
+        if (!response.ok) {
+          throw new Error('Failed to fetch plans');
+        }
+        const plansData: Plan[] = await response.json();
+        setPlans(plansData);
       } catch (error) {
         console.error('Error fetching plans:', error);
       }
     };
 
+    fetchParticipants();
     fetchPlans();
   }, []);
 
@@ -94,28 +76,27 @@ const Page: React.FC = () => {
   const handlePlanSelect = (plan: Plan) => {
     setSelectedPlan(plan);
     setSelectedParticipant(null);
+    // Participants for the selected plan are already fetched on page load
   };
 
   const handleParticipantSelect = (participant: Participant) => {
     setSelectedParticipant(participant);
+    // Handle participant selection logic here
   };
 
-  const handleValuePropChange = (newValueProp: string) => {
-    console.log('ValueProp changed:', newValueProp);
-    // Implement logic to handle value prop change here
+  const handleHealthClick = (plan: Plan) => {
+    setSelectedPlan(plan); // Set the selected plan
+    setHealthModalOpen(true); // Open the PlanHealth modal
   };
 
   const renderContent = () => {
     switch (selectedNavItem.label) {
-      case 'Plans':
+      case 'All Plans':
         return (
           <>
-            <PlanTable plans={plans} onPlanSelect={handlePlanSelect} />
+            <PlanTable plans={plans} onPlanSelect={handlePlanSelect} onHealthClick={handleHealthClick} />
             {selectedPlan && (
-              <ParticipantTable
-                participants={selectedPlan.participants}
-                onParticipantSelect={handleParticipantSelect}
-              />
+              <ParticipantTable participants={participants} onParticipantSelect={handleParticipantSelect} />
             )}
             {selectedParticipant && (
               <ClientTable
@@ -130,22 +111,14 @@ const Page: React.FC = () => {
         );
       case 'Value Proposition':
         return (
-          <ValuePropProvider>
             <ValueProp
-              valuePropId="12345678" // Example value proposition ID (replace with actual value)
-              userId={userUid} // User ID associated with the value proposition
-              ageGroup="30-45" // Example age group (replace with actual age group)
-              role="Advisor" // Example role (replace with actual role)
-              description="Financial advisor specializing in retirement planning" // Example description
-              interests={['Retirement', 'Investments', 'Estate Plans']} // Example interests
-              onValuePropChange={handleValuePropChange} // Function to handle value proposition change
+              userId={userUid}
+              onValuePropChange={(newValueProp: string) => console.log('ValueProp changed:', newValueProp)}
             />
-          </ValuePropProvider>
         );
-      case 'Campaigns':
-        return (
-          <Campaigns selectedClient={selectedParticipant} />
-        );
+      case 'Plan Campaigns':
+        return <Campaigns selectedClient={selectedParticipant} />;
+      case 'Coming Soon...':
       default:
         return null;
     }
@@ -160,8 +133,8 @@ const Page: React.FC = () => {
             <li
               key={item.id}
               onClick={() => handleNavigationItemClick(item)}
-              className={`${selectedNavItem.id === item.id ? 'active' : ''}`}
-              style={{ color: item.disabled ? 'gray' : 'black', cursor: item.disabled ? 'not-allowed' : 'pointer' }}
+              className={`${selectedNavItem.id === item.id ? 'active' : 'navyblue'}`}
+              style={{ color: item.disabled ? 'gray' : 'navyblue', cursor: item.disabled ? 'not-allowed' : 'pointer' }}
             >
               {item.label}
             </li>
@@ -170,6 +143,16 @@ const Page: React.FC = () => {
       </div>
       <div className="content-container">
         {renderContent()}
+        {selectedPlan && (
+          <PlanHealth
+            isOpen={isHealthModalOpen}
+            onClose={() => {
+              setSelectedPlan(null);
+              setHealthModalOpen(false);
+            }}
+            plan={selectedPlan}
+          />
+        )}
       </div>
     </div>
   );

@@ -33,7 +33,7 @@ const Home: React.FC = () => {
       return;
     }
 
-    if (password !== 'demo2024') {
+    if (password !== 'ai2024') {
       setError('Incorrect password. Please enter the correct code.');
       return;
     }
@@ -125,7 +125,7 @@ const Home: React.FC = () => {
           {!accountCreated && (
             <input
               type="password"
-              placeholder="Enter password - demo2024"
+              placeholder="Enter password - ai2024"
               value={password}
               onChange={handlePasswordChange}
               className="border border-gray-300 rounded-lg px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-navyblue"
