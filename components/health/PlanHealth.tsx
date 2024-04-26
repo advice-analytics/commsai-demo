@@ -116,12 +116,12 @@ const PlanHealth: React.FC<PlanHealthProps> = ({ isOpen, onClose, plan }) => {
               <Image src="/dailyvest.png" alt="DailyVest Logo" width={100} height={100} />
             </div>
             <p style={{ textAlign: 'center', marginBottom: '30px', marginTop:'40px' }}>
-              Clicking "View Insights" will direct you to dailyVest.com for Plan Health and Participant details.
+              Clicking `View Insights` will direct you to dailyVest.com for Plan Health and Participant details.
             </p>
             <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>{plan.planName}</h3>
             <p style={{ textAlign: 'center', marginBottom: '40px' }}>Plan Health Score: {plan.health}%</p>
             <div style={{ margin: '0 auto', width: '100%', maxWidth: '300px', textAlign: 'center' }}>
-              <canvas ref={chartRef} id="healthChart" style={{ width: '100%', height: 'auto' }}></canvas>
+              <canvas ref={chartRef} id='healthChart' style={{ width: '100%', height: 'auto' }}></canvas>
             </div>
           </div>
         </div>
