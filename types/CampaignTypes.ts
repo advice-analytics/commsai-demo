@@ -1,5 +1,4 @@
 // Define the Participant interface
-// Define the Participant interface with optional properties
 export interface Participant {
   id: string;
   name: string;
@@ -10,25 +9,25 @@ export interface Participant {
   scores: {
     [key: string]: number;
   };
-  hasBalance?: number;
-  glidePath?: string;
-  planReturns?: string;
-  savingsRatePercent?: number;
-  gender?: string;
-  salary?: number;
+  hasBalance?: number; // Optional property
+  glidePath?: string; // Optional property
+  planReturns?: string; // Optional property
+  savingsRatePercent?: number; // Optional property
+  gender?: string; // Optional property
+  salary?: number; // Optional property
 }
-
 
 // Define the Campaign interface
 export interface Campaign {
-  plan: string;
   id: string;
   name: string;
   type: string;
   ageGroup: string;
   prompt?: string;
   userId?: string;
+  plan: string;
+  planName: string;
   selectedPlan?: string;
-  participant: Participant;
-  planName: string; // Participant data within the campaign
+  participant?: Participant | null; // participant can be Participant object or null
 }
+
