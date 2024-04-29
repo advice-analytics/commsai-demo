@@ -70,7 +70,7 @@ const ValueProp: React.FC<ValuePropProps> = ({ onValuePropChange }) => {
 
   return (
     <div className="p-4 border rounded-lg shadow-lg bg-white">
-      <h2 className="text-3xl font-semibold mb-4 text-navyblue">Value Proposition</h2>
+      <h2 className="text-2xl font-semibold mb-4 text-navyblue">Value Proposition</h2>
       <div className="mb-4">
         <label htmlFor="value-prop" className="block mb-2 text-navyblue">
           Enter Value Prop:
@@ -91,7 +91,7 @@ const ValueProp: React.FC<ValuePropProps> = ({ onValuePropChange }) => {
         <button
           onClick={handleSave}
           disabled={loading}
-          className="bg-green-500 text-white px-4 py-2 rounded-md"
+          className="bg-green-400 text-white px-4 py-2 rounded-md"
         >
           Save
         </button>

@@ -147,7 +147,7 @@ const Home: React.FC = () => {
         </form>
       </main>
 
-      <footer className="text-xs text-gray-600 mt-24 mx-6 text-center">
+      <footer className="px-8 text-xs text-gray-600 mt-20 mx-6 text-center">
         © 2024. Advice Analytics. We offer this preview as a demonstration of features,
         and it is not meant to make claims nor share personal data in any way.{' '}
         <a

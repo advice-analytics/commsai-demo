@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react';
 import { auth } from '@/utilities/firebaseClient';
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -52,6 +54,49 @@ const AdvisorInfo: React.FC<AdvisorInfoProps> = ({ userEmail, valuePropId, onClo
     }
   };
 
+  const handleDownloadExampleData = () => {
+    // Example data to be downloaded as a JSON or CSV file
+    const exampleData = `
+      IDPerson | 3426401
+      Participant Name |  [{IDV:549:2F05CDFE:5241}]
+      Employee ID | [{IDV:549:0B9CB369:68507}]
+      Balance | $1,201,564.01 
+      Has Balance | Yes
+      Glide path | Above glide path
+      Pct equity (est) | 96%
+      Plan Returns | 30.20%
+      Contributors & Non-contributors | Contributors
+      Contributed YTD | $3,030.00 
+      Contributed to IRS limit | $3,030.00 
+      Contributor Types | YTD Pre-Tax
+      Can Contribute | Yes
+      Employee Status | Active
+      Age | 50.2
+      Tenure | 24.8
+      Savings Rate % | 5.00%
+      Advice Status | Manage On Your Own
+      Years in Current Advice Status | 3.5
+      My Ret Prog. Projected Income % | 99.00%
+      My Ret Prog. Income Expected | $8,638.00 
+      Investments diversified? | No
+      Investor Profile Employer | stock user
+      Participant Division Code | 1
+      Plan Division Name | [{IDV:549:530B274B:1}]
+      State | NE
+      Using SDBA | Not using SDBA`;
+
+    // Convert exampleData to Blob and create an anchor element for download
+    const blob = new Blob([exampleData], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'example_data.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Close the modal only if the click is on the overlay backdrop (outside modal content)
     if (e.target === e.currentTarget) {
@@ -71,6 +116,7 @@ const AdvisorInfo: React.FC<AdvisorInfoProps> = ({ userEmail, valuePropId, onClo
             Upload Plan Data
             <input type="file" onChange={handleFileInputChange} className="file-input" />
           </label>
+          <button className="download-example-btn" onClick={handleDownloadExampleData}>Download Example Data</button>
         </div>
       </div>
       <style jsx>{`
@@ -102,7 +148,8 @@ const AdvisorInfo: React.FC<AdvisorInfoProps> = ({ userEmail, valuePropId, onClo
           margin-top: 20px;
         }
         .logout-btn,
-        .file-upload-btn {
+        .file-upload-btn,
+        .download-example-btn {
           display: block;
           width: 100%;
           margin-bottom: 10px;
@@ -116,7 +163,8 @@ const AdvisorInfo: React.FC<AdvisorInfoProps> = ({ userEmail, valuePropId, onClo
           transition: background-color 0.3s ease;
         }
         .logout-btn:hover,
-        .file-upload-btn:hover {
+        .file-upload-btn:hover,
+        .download-example-btn:hover {
           background-color: #144e74;
         }
         .file-input {

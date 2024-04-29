@@ -238,7 +238,6 @@ h3 {
   color: white;
 }
 
-
 @media (max-width: 768px) {
   .main-container {
     flex-direction: column;
@@ -264,12 +263,12 @@ h3 {
   .nav-container ul li:nth-child(1),
   .nav-container ul li:nth-child(2) {
     display: block;
-    margin-right: 10px; /* Add spacing between items */
+    margin-right: 20px; /* Add spacing between items */
   }
 
   .content-container {
-    padding:20px;
-    margin-top: 300px; /* Maintain padding for tablets */
+    padding: 20px;
+    margin-top: 350px; /* Maintain padding for tablets */
   }
 
   .nav-container ul li {
@@ -371,7 +370,7 @@ h3 {
 
   .content-container {
     padding: 20px; /* Maintain padding for mobile devices */
-    padding-left: 0; /* Remove left padding for mobile devices */
+    margin-top: 400px; /* Maintain padding for tablets */
   }
 
   .advisor-banner {

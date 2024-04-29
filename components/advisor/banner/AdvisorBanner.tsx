@@ -9,11 +9,11 @@ import ValuePropPopup from '../value/ValuePropPopup';
 import ValueProp from '../value/ValueProp';
 
 const serviceCategories = [
-  { name: 'Retirement', icon: 'retirement-light.svg' },
-  { name: 'Financial Plans', icon: 'financial-light.svg' },
-  { name: 'Tax Plans', icon: 'money-light.svg' },
-  { name: 'Investment', icon: 'investement-light.svg' },
-  { name: 'Estate Plans', icon: 'estate-light.svg' },
+  { name: '| Retirement |', icon: 'retirement-light.svg' },
+  { name: '| Financial Plans |', icon: 'financial-light.svg' },
+  { name: '| Tax Plans |', icon: 'money-light.svg' },
+  { name: '| Investment |', icon: 'investement-light.svg' },
+  { name: '| Estate Plans | ', icon: 'estate-light.svg' },
 ];
 
 const storage = getStorage();
@@ -114,11 +114,13 @@ const AdvisorBanner: React.FC = () => {
   };
 
   return (
-    <div className="advisor-banner bg-blue-900 text-white p-4 rounded-md shadow-md">
+    <div className="advisor-banner bg-blue-900 text-white p-4 rounded-md shadow-md relative">
       <div className="profile-section flex justify-between items-center w-full mb-4">
         <div className="profile-picture relative cursor-pointer" onClick={() => document.getElementById('profile-picture-input')?.click()}>
           {loadingProfile ? (
-            <div className="loading-spinner absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">Updating</div>
+            <div className="loading-spinner absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-black text-sm font-bold bg-black bg-opacity-75 px-2 py-1 rounded">
+              Loading Profile...
+            </div>
           ) : (
             <>
               {profilePictureUrl ? (

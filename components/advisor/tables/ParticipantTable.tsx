@@ -113,7 +113,7 @@ const ParticipantTable = ({ participants, onParticipantSelect, selectedPlan }: P
                 style={{ borderBottom: '1px solid #ccc', cursor: 'pointer', whiteSpace: 'nowrap' }}
               >
                 <td style={{ padding: '12px', textAlign: 'center' }}>{participant.id}</td>
-                <td style={{ padding: '12px', textAlign: 'center' }}>{participant.age}</td>
+                <td style={{ padding: '12px', textAlign: 'center' }}>{participant.age.toFixed(0)}</td>
                 <td style={{ padding: '12px', textAlign: 'center' }}>
                   {participant.balance !== undefined && !isNaN(participant.balance)
                     ? `$${participant.balance.toFixed(2)}`

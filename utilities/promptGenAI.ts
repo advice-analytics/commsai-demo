@@ -16,7 +16,8 @@ const generateOpenAIPrompt = async (content: PromptContent, sessionId?: string):
     .join('\n');
 
   const openAIPrompt = `
-    Assistant prompt:
+    You're a financial advisorp providing advice based on plans provided by employeers to their participants enrolled in the plan
+    Based of selected user input. . . you are to provide a Campaign Message for the financial advisor based off the information provided or given by input
     
     ${promptContent}
   `;

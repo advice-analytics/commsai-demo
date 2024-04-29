@@ -121,7 +121,7 @@ const saveValuePropToDatabase = async (uid: string, valueProp: string): Promise<
 // Function to get value proposition from Firebase Realtime Database
 const getValuePropFromDatabase = async (uid: string): Promise<string> => {
   try {
-    const valuePropRef = dbRef(database, `users/${uid}/valueProps`);
+    const valuePropRef = dbRef(database, `users/${uid}/valueProp`);
     const dataSnapshot: DataSnapshot = await get(valuePropRef);
     const valuePropData = dataSnapshot.val();
 

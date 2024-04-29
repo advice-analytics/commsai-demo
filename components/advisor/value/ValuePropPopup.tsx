@@ -71,6 +71,7 @@ const ValuePropPopup: React.FC<ValuePropPopupProps> = ({ children, onClose, valu
         }
         .close-button {
           background: none;
+          color: black;
           border: none;
           cursor: pointer;
           padding: 0;
