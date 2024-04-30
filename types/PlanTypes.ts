@@ -5,7 +5,7 @@ import { Participant } from "./ParticipantTypes";
 export interface Plan {
   id: string; 
   planName: string;
-  assets: string;
+  balance: string;
   participants: Participant[];
   health: string;
 }

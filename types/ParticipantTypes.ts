@@ -27,6 +27,7 @@ export interface Participant {
   estate: number;       // Add estate property
   planId: string;
   planName: string; // Add planName property  // Add planId property
+  adviceScore: string;
   scores: {
     [key: string]: number;
   };

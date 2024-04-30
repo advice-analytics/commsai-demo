@@ -156,6 +156,26 @@ const saveCampaignToDatabase = async (uid: string, campaignData: any): Promise<v
   }
 };
 
+// Function to retrieve campaigns for a specific user from Firebase Realtime Database
+const getCampaignsForUser = async (uid: string): Promise<any[]> => {
+  try {
+    const campaignsRef = dbRef(database, `users/${uid}/campaigns`);
+    const dataSnapshot: DataSnapshot = await get(campaignsRef);
+    const campaigns: any[] = [];
+
+    dataSnapshot.forEach((childSnapshot) => {
+      const campaignData = childSnapshot.val();
+      campaigns.push(campaignData);
+    });
+
+    return campaigns;
+  } catch (error: any) {
+    console.error('Error retrieving campaigns from database:', error.message);
+    throw error;
+  }
+};
+
+
 // Function to upload user profile picture with dynamic file extension
 const uploadProfilePicture = async (uid: string, file: File): Promise<string> => {
   try {
@@ -206,6 +226,7 @@ const getProfilePictureURL = async (uid: string): Promise<string | null> => {
 
 // Export Firebase services and functions for use in other modules
 export {
+  getCampaignsForUser,
   auth,
   createAccountWithEmail,
   signInUserWithEmailAndPassword,

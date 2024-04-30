@@ -1,39 +1,33 @@
 'use client'
 
-// Import React and necessary hooks/components
 import React, { useState, useEffect } from 'react';
 import { Campaign } from '@/types/CampaignTypes';
-import { saveCampaignToDatabase, deleteCampaignFromDatabase } from '@/utilities/firebaseClient';
+import { saveCampaignToDatabase, deleteCampaignFromDatabase, getCampaignsForUser } from '@/utilities/firebaseClient';
 import { generateCampaignPrompt } from '@/utilities/promptGenAI';
 import { useAuth } from '../context/authContext';
 import { Participant } from '@/types/ParticipantTypes';
 
-// Define props interface for Campaigns component
 interface CampaignsProps {
   selectedClient: Participant | null;
 }
 
-// Define Campaigns component
 const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
-  // State hooks for managing component state
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [newCampaignName, setNewCampaignName] = useState('');
-  const [newCampaignType, setNewCampaignType] = useState<string>('');
+  const [newCampaignType, setNewCampaignType] = useState<string>('558'); // Initialize with '558' as the only selectable option
   const [newCampaignAgeGroup, setNewCampaignAgeGroup] = useState<string>('');
   const [selectedScenario, setSelectedScenario] = useState<string>('');
   const [messageContent, setMessageContent] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
-  // Retrieve authenticated user data using useAuth hook
   const [userData, setUser] = useAuth();
-  const userUid: string = userData?.uid || ''; // Get user UID or default to empty string if not available
+  const userUid: string = userData?.uid || '';
 
-  // State hooks for plans and participants data
-  const [plans, setPlans] = useState<any[]>([]);
-  const [participants, setParticipants] = useState<any[]>([]);
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [participantOffset, setParticipantOffset] = useState<number>(0); // Offset for batch loading
+  const batchSize = 10; // Number of participants to load per batch
 
-  // Array of participant scenarios
   const participantScenarios = [
     'Not contributing to their plan, but eligible',
     'Contributing to their plan, but less than IRS limits',
@@ -46,102 +40,98 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
     'Opportunity to save more',
   ];
 
-  // Effect hook to load plans and participants data on component mount
   useEffect(() => {
-    const loadPlansAndParticipants = async () => {
+    const loadUserCampaigns = async () => {
       try {
         setLoading(true);
-        const plansResponse = await fetch('/api/plans');
-        if (!plansResponse.ok) {
-          throw new Error('Failed to fetch plans');
-        }
-        const plansData = await plansResponse.json();
-        setPlans(plansData);
 
-        const participantsResponse = await fetch('/api/participants');
-        if (!participantsResponse.ok) {
-          throw new Error('Failed to fetch participants');
-        }
-        const participantsData = await participantsResponse.json();
-        setParticipants(participantsData);
+        const userCampaigns = await getCampaignsForUser(userUid);
+        setCampaigns(userCampaigns);
+
         setLoading(false);
       } catch (error) {
-        console.error('Error loading plans or participants:', error);
-        setError('Failed to load data. Please try again.');
+        console.error('Error loading campaigns:', error);
+        setError('Failed to load campaigns. Please try again.');
         setLoading(false);
       }
     };
 
-    loadPlansAndParticipants();
-  }, []);
+    loadUserCampaigns();
+  }, [userUid]);
 
-  // Function to handle campaign creation
-const handleCreateCampaign = async () => {
-  if (!newCampaignName || !newCampaignType || !newCampaignAgeGroup || !selectedScenario || !messageContent) {
-    setError('Please fill out all fields.');
-    return;
-  }
+  useEffect(() => {
+    const loadParticipants = async () => {
+      try {
+        setLoading(true);
 
-  setLoading(true);
+        // Fetch participants with batch loading
+        const response = await fetch(`/api/participants?offset=${participantOffset}&limit=${batchSize}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch participants');
+        }
+        const participantsData = await response.json();
+        setParticipants((prevParticipants) => [...prevParticipants, ...participantsData]);
 
-  try {
-    const planName = newCampaignType; // Use the selected plan type directly
-    const ageGroup = newCampaignAgeGroup; // Use the selected age group directly
-
-    const newCampaign: Campaign = {
-      id: String(Math.random()),
-      name: newCampaignName,
-      type: planName,
-      ageGroup: ageGroup,
-      prompt: '', // Placeholder for GenAI message
-      userId: userUid,
-      plan: '', // Set this to empty or handle as needed
-      planName: planName,
-      participant: null, // Set this to empty or handle as needed
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading participants:', error);
+        setError('Failed to load participants. Please try again.');
+        setLoading(false);
+      }
     };
 
-    const campaignPrompt: string = await generateCampaignPrompt(
-      newCampaign.name,
-      newCampaign.type,
-      participantScenarios,
-      newCampaign.ageGroup,
-      userUid
-    );
+    if (newCampaignType === '558' && participants.length === 0) {
+      // Load participants if '558' plan is selected and participants are not yet loaded
+      loadParticipants();
+    }
+  }, [newCampaignType, participantOffset]); // Trigger when newCampaignType changes or participantOffset changes
 
-    newCampaign.prompt = campaignPrompt;
+  const handleCreateCampaign = async () => {
+    if (!newCampaignName || !newCampaignAgeGroup || !selectedScenario || !messageContent) {
+      setError('Please fill out all fields.');
+      return;
+    }
 
-    await saveCampaignToDatabase(userUid, newCampaign);
+    setLoading(true);
 
-    setCampaigns([...campaigns, newCampaign]);
-    clearInputFields();
-    setLoading(false);
-  } catch (error) {
-    console.error('Error creating campaign:', error);
-    setError('Failed to create campaign. Please try again.');
-    setLoading(false);
-  }
-};
-
-
-  // Function to handle editing campaign message
-  const handleEditMessage = async (campaignId: string, updatedMessage: string) => {
     try {
-      const updatedCampaigns = campaigns.map((campaign) =>
-        campaign.id === campaignId ? { ...campaign, prompt: updatedMessage } : campaign
+      const planName = '558'; // Set plan name to '558' since it's fixed
+      const ageGroup = newCampaignAgeGroup;
+
+      const newCampaign: Campaign = {
+        id: String(Math.random()),
+        name: newCampaignName,
+        type: planName,
+        ageGroup: ageGroup,
+        prompt: '',
+        userId: userUid,
+        plan: '', // Set plan data as needed
+        planName: planName,
+        participant: null, // Set participant data as needed
+      };
+
+      const campaignPrompt: string = await generateCampaignPrompt(
+        newCampaign.name,
+        newCampaign.type,
+        participantScenarios,
+        newCampaign.ageGroup,
+        userUid
       );
 
-      setCampaigns(updatedCampaigns);
+      newCampaign.prompt = campaignPrompt;
 
-      await saveCampaignToDatabase(userUid, updatedCampaigns.find((campaign) => campaign.id === campaignId) || {});
+      await saveCampaignToDatabase(userUid, newCampaign);
 
-      alert('Campaign message updated successfully!');
+      setCampaigns([...campaigns, newCampaign]);
+      clearInputFields();
+      setLoading(false);
     } catch (error) {
-      console.error('Error updating campaign:', error);
-      setError('Failed to update campaign. Please try again.');
+      console.error('Error creating campaign:', error);
+      setError('Failed to create campaign. Please try again.');
+      setLoading(false);
     }
   };
 
-  // Function to handle deleting a campaign
   const handleDeleteCampaign = async (campaignId: string) => {
     try {
       await deleteCampaignFromDatabase(userUid, campaignId);
@@ -154,20 +144,41 @@ const handleCreateCampaign = async () => {
     }
   };
 
-  // Function to clear input fields after campaign creation
+  const handleEditPrompt = (campaignId: string, updatedPrompt: string) => {
+    const updatedCampaigns = campaigns.map((campaign) =>
+      campaign.id === campaignId ? { ...campaign, prompt: updatedPrompt } : campaign
+    );
+    setCampaigns(updatedCampaigns);
+  };
+
+  const handleSavePrompt = async (campaignId: string) => {
+    try {
+      setLoading(true);
+
+      const campaignToUpdate = campaigns.find((campaign) => campaign.id === campaignId);
+      if (campaignToUpdate) {
+        await saveCampaignToDatabase(userUid, campaignToUpdate);
+        setLoading(false);
+        alert('Campaign message updated successfully!');
+      }
+    } catch (error) {
+      console.error('Error updating campaign:', error);
+      setError('Failed to update campaign. Please try again.');
+      setLoading(false);
+    }
+  };
+
   const clearInputFields = () => {
     setNewCampaignName('');
-    setNewCampaignType('');
     setNewCampaignAgeGroup('');
     setSelectedScenario('');
     setMessageContent('');
     setError('');
   };
 
-  // Render the Campaigns component UI
+
   return (
     <div className="container mx-auto p-4">
-      {/* Create New Campaign section */}
       <h2 className="text-3xl font-semibold mb-8 text-navyblue">New Campaign</h2>
       <div className="grid grid-cols-1 gap-4 mb-6">
         <div>
@@ -192,13 +203,9 @@ const handleCreateCampaign = async () => {
             value={newCampaignType}
             onChange={(e) => setNewCampaignType(e.target.value)}
             className="input-field shadow-md px-4 py-3 rounded-lg w-full"
+            disabled={true} // Disable the dropdown after selecting the '558' plan
           >
-            <option value="">Select a plan</option>
-            {plans.map((plan) => (
-              <option key={plan.id} value={plan.id}>
-                {plan.planName}
-              </option>
-            ))}
+            <option value="558">Plan 558</option>
           </select>
         </div>
         <div>
@@ -214,12 +221,11 @@ const handleCreateCampaign = async () => {
             <option value="">Select a participant</option>
             {participants.map((participant) => (
               <option key={participant.id} value={participant.id}>
-                {participant.id}
+                ID {participant.id}, Balance {participant.balance}, Advice Score {participant.adviceScore}, Plan 558
               </option>
             ))}
           </select>
         </div>
-        {/* Select Scenario */}
         <div>
           <label htmlFor="selectedScenario" className="block text-sm font-medium text-gray-600">
             Select Scenario
@@ -257,50 +263,52 @@ const handleCreateCampaign = async () => {
         >
           {loading ? 'Creating Campaign...' : 'Create Campaign'}
         </button>
-        {/* Display error message if there's an issue */}
         {error && <p className="text-red-600 mt-2">{error}</p>}
       </div>
 
-      {/* Existing Campaigns section */}
       <h2 className="text-3xl font-semibold mt-8 mb-4 text-navyblue">Existing Campaigns</h2>
+      {/* Render existing campaigns */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {campaigns.map((campaign) => {
-          // Find the corresponding plan based on campaign's plan ID
-          const selectedPlan = plans.find((plan) => plan.id === campaign.plan);
+        {campaigns.map((campaign) => (
+          <div key={campaign.id} className="bg-white p-6 rounded-lg shadow-md">
+            {/* Display campaign details */}
+            <h3 className="text-lg font-semibold mb-2">{campaign.name}</h3>
+            <p>Plan: {campaign.type}</p>
+            <p>Participant: {campaign.ageGroup}</p>
+            {/* Editable prompt */}
+            <div className="my-4">
+              <strong>Prompt:</strong>
+              <textarea
+                value={campaign.prompt}
+                onChange={(e) => handleEditPrompt(campaign.id, e.target.value)}
+                placeholder="Edit campaign message..."
+                rows={4}
+                className="input-field shadow-md px-4 py-3 rounded-lg w-full cursor-pointer"
+              />
 
-          // Find the corresponding participant based on campaign's participant ID
-          const selectedParticipant = participants.find((participant) => participant.id === campaign.participant);
-
-          return (
-            <div key={campaign.id} className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold mb-2">{campaign.name}</h3>
-              <p>Plan: {campaign.type}</p>
-              <p>Participant: {campaign.ageGroup}</p>
-              <div className="my-4">
-                <strong>Prompt:</strong>
-                <textarea
-                  value={campaign.prompt}
-                  onChange={(e) => handleEditMessage(campaign.id, e.target.value)}
-                  placeholder="Edit campaign message..."
-                  rows={4}
-                  className="input-field shadow-md px-4 py-3 rounded-lg w-full cursor-pointer"
-                />
-              </div>
               <div className="flex justify-center mt-4">
-                <button
-                  onClick={() => handleDeleteCampaign(campaign.id)}
-                  className="btn-delete bg-red-500 text-white rounded hover:bg-red-600 px-4 py-2"
-                >
-                  Delete
-                </button>
+              <button
+                onClick={() => handleSavePrompt(campaign.id)}
+                className="btn-primary bg-green-500 text-white mt-2 rounded-md py-2 px-4"
+              >
+                Save
+              </button>
               </div>
             </div>
-          );
-        })}
+            {/* Delete button */}
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => handleDeleteCampaign(campaign.id)}
+                className="btn-delete bg-red-500 text-white rounded hover:bg-red-600 px-4 py-2"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
 };
 
-// Export Campaigns component as default
 export default Campaigns;

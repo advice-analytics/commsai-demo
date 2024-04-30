@@ -23,12 +23,10 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanSelect, onHealthClic
 
   const calculateSummary = (plans: Plan[]) => {
     const totalPlans = plans.length;
-    const totalAssets = plans.reduce((sum, plan) => sum + parseFloat(plan.assets.replace(/[$,]/g, '')), 0);
     const totalParticipants = plans.reduce((sum, plan) => sum + (plan.participants ? plan.participants.length : 0), 0);
   
     return {
       totalPlans,
-      totalAssets,
       totalParticipants,
     };
   };
@@ -65,9 +63,8 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanSelect, onHealthClic
           color: '#144e74',
         }}
       >
-        <p>Total Plans: {summary.totalPlans}</p>
-        <p>Total Assets: ${summary.totalAssets.toLocaleString()}</p>
-        <p>Total Participants: {summary.totalParticipants}</p>
+        <h3>Total Plans: {summary.totalPlans}</h3>
+        <h3>Participants: {summary.totalParticipants}</h3>
       </div>
   
       {/* Table container with horizontal scrollbar */}
@@ -89,7 +86,6 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanSelect, onHealthClic
           <thead>
             <tr style={{ backgroundColor: '#144e74', color: 'white', textAlign: 'center' }}>
               <th style={{ padding: '10px', border: '1px solid #ccc', whiteSpace: 'nowrap' }}>Plan</th>
-              {!isMobileView && <th style={{ padding: '10px', border: '1px solid #ccc', whiteSpace: 'nowrap' }}>Assets</th>}
               {!isMobileView && <th style={{ padding: '10px', border: '1px solid #ccc', whiteSpace: 'nowrap' }}>Participants</th>}
               <th style={{ padding: '10px', border: '1px solid #ccc', whiteSpace: 'nowrap' }}>Health</th>
               <th style={{ padding: '10px', border: '1px solid #ccc', whiteSpace: 'nowrap' }}>Select</th>
@@ -99,7 +95,6 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanSelect, onHealthClic
             {plans.map((plan) => (
               <tr key={plan.planName} style={{ borderBottom: '1px solid #ccc', whiteSpace: 'nowrap' }}>
                 <td style={{ padding: '12px', textAlign: 'center' }}>{plan.planName}</td>
-                {!isMobileView && <td style={{ padding: '12px', textAlign: 'center' }}>{plan.assets}</td>}
                 {!isMobileView && (
                   <td style={{ padding: '12px', textAlign: 'center' }}>{plan.participants ? plan.participants.length : 0}</td>
                 )}
@@ -117,8 +112,20 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanSelect, onHealthClic
                 </td>
                 <td style={{ padding: '12px', textAlign: 'center' }}>
                   <button
-                    style={{ cursor: 'pointer', backgroundColor: '#144e74', color: 'white', border: 'none', borderRadius: '5px', padding: '8px 12px' }}
-                    onClick={() => onPlanSelect(plan)}
+                    style={{
+                      cursor: 'pointer',
+                      backgroundColor: plan.planName === '558' ? '#144e74' : '#ccc',
+                      color: plan.planName === '558' ? 'white' : 'black',
+                      border: 'none',
+                      borderRadius: '5px',
+                      padding: '8px 12px',
+                    }}
+                    onClick={() => {
+                      if (plan.planName === '558') {
+                        onPlanSelect(plan);
+                      }
+                    }}
+                    disabled={plan.planName !== '558'}
                   >
                     Select
                   </button>
@@ -130,7 +137,6 @@ const PlanTable: React.FC<PlanTableProps> = ({ plans, onPlanSelect, onHealthClic
       </div>
     </div>
   );
-  };
-  
-  export default PlanTable; 
-  
+};
+
+export default PlanTable;
