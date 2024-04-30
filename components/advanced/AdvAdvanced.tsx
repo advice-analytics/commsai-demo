@@ -40,7 +40,6 @@ const AdvAdvance: React.FC = () => {
       // Extract relevant properties from the selected plan to create financial details
       const financialDetails = `
         Plan Name: ${selectedPlan.planName}
-        Assets: ${selectedPlan.assets}
         Number of Participants: ${selectedPlan.participants.length}
         Health: ${selectedPlan.health}
         // Add more properties as needed

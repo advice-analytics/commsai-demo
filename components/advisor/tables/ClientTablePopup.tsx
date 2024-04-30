@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Chart, Chart as ChartType, registerables } from 'chart.js/auto';
 import { Participant } from '@/types/ParticipantTypes';
 
@@ -19,13 +19,13 @@ const ClientTablePopup: React.FC<ClientTablePopupProps> = ({
 }) => {
   const { retirement, financial, tax, investment, estate, planReturns, balance, age, state, gender, adviceScore } = participant;
 
-  const stressors = [
+  const stressors = useMemo(() => [
     { name: 'Retirement', value: retirement, color: 'orange' },
     { name: 'Financial', value: financial, color: 'green' },
     { name: 'Tax', value: tax, color: 'blue' },
     { name: 'Investment', value: investment, color: 'red' },
     { name: 'Estate', value: estate, color: 'purple' },
-  ];
+  ], [retirement, financial, tax, investment, estate]);
 
   const calculateTopStressor = (stressors: { name: string; value: number; color: string }[]) => {
     const sortedStressors = [...stressors].sort((a, b) => b.value - a.value); // Sort stressors by value descending
