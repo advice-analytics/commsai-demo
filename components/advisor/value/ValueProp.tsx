@@ -2,52 +2,60 @@
 
 import React, { useState, useEffect } from 'react';
 import { saveValuePropToDatabase, getValuePropFromDatabase } from '@/utilities/firebaseClient';
-import { useAuth } from '@/components/context/authContext'; // Import useAuth hook and UserData type
+import { useAuth } from '@/components/context/authContext';
 
 interface ValuePropProps {
-  userId: string;
+  uid: string; // Change userId to uid
   onValuePropChange: (newValueProp: string) => void;
+  initialValue: string;
 }
 
-const ValueProp: React.FC<ValuePropProps> = ({ onValuePropChange }) => {
-  const [valueProp, setValueProp] = useState('');
-  const [currentChars, setCurrentChars] = useState(0);
+const ValueProp: React.FC<ValuePropProps> = ({ uid, onValuePropChange, initialValue }) => {
+  const [valueProp, setValueProp] = useState(initialValue);
+  const [currentChars, setCurrentChars] = useState(initialValue ? initialValue.length : 0);
   const [maxChars] = useState(250);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  const [userData] = useAuth(); // Retrieve userData from AuthContext
-  const userId = userData.uid || ''; // Extract userId from userData or default to empty string
+  const [userData, loadingAuth] = useAuth();
+  // Extract uid from userData instead of userId
+  const userId = userData?.uid || '';
 
   useEffect(() => {
     const fetchValueProp = async () => {
-      try {
-        const fetchedValueProp = await getValuePropFromDatabase(userId);
-
-        if (fetchedValueProp !== undefined) {
-          setValueProp(fetchedValueProp); // Set valueProp to fetched value
-          setCurrentChars(fetchedValueProp.length);
-        } else {
-          setValueProp(''); // Set valueProp to empty string if fetchedValueProp is undefined
-          setCurrentChars(0);
+      if (uid) { // Use uid instead of userId
+        setLoading(true);
+        try {
+          const fetchedValueProp = await getValuePropFromDatabase(uid); // Use uid instead of userId
+          if (fetchedValueProp !== undefined) {
+            setValueProp(fetchedValueProp);
+            setCurrentChars(fetchedValueProp.length);
+          } else {
+            setValueProp('');
+            setCurrentChars(0);
+          }
+        } catch (error) {
+          console.error('Error fetching value proposition:', error);
+        } finally {
+          setLoading(false);
         }
-
-        setLoading(false); // Update loading state to indicate data has been fetched
-      } catch (error) {
-        console.error('Error fetching value proposition:', error);
-        setLoading(false); // Update loading state even on error
       }
     };
 
-    fetchValueProp(); // Invoke fetchValueProp on component mount
-  }, [userId]); // Re-run effect when userId changes
+    fetchValueProp();
+  }, [uid]); // Re-run effect when uid changes
 
   const handleSave = async () => {
-    try {
-      await saveValuePropToDatabase(userId, valueProp);
-      alert('Value proposition saved successfully!');
-    } catch (error) {
-      console.error('Error saving value proposition:', error);
-      alert('Failed to save value proposition. Please try again.');
+    if (uid && valueProp.trim() !== '') {
+      setLoading(true);
+      try {
+        await saveValuePropToDatabase(uid, valueProp); // Use uid instead of userId
+        alert('Value proposition saved successfully!');
+      } catch (error) {
+        console.error('Error saving value proposition:', error);
+        alert('Failed to save value proposition. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -90,10 +98,10 @@ const ValueProp: React.FC<ValuePropProps> = ({ onValuePropChange }) => {
       <div className="flex items-center justify-between">
         <button
           onClick={handleSave}
-          disabled={loading}
+          disabled={loading || !uid} // Use uid instead of userId
           className="bg-green-400 text-white px-4 py-2 rounded-md"
         >
-          Save
+          {loading ? 'Saving...' : 'Save'}
         </button>
       </div>
     </div>

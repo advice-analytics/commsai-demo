@@ -7,6 +7,7 @@ import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } f
 import AdvisorInfo from './AdvisorInfo';
 import ValuePropPopup from '../value/ValuePropPopup';
 import ValueProp from '../value/ValueProp';
+import { saveValuePropToDatabase, getValuePropFromDatabase } from '@/utilities/firebaseClient'; // Import Firebase functions
 
 const serviceCategories = [
   { name: '| Retirement |', icon: 'retirement-light.svg' },
@@ -22,9 +23,9 @@ const AdvisorBanner: React.FC = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
   const [valuePropId, setValuePropId] = useState<string>('');
+  const [loadingProfile, setLoadingProfile] = useState<boolean>(true);
   const [showValuePropPopup, setShowValuePropPopup] = useState<boolean>(false);
   const [showAdvisorInfo, setShowAdvisorInfo] = useState<boolean>(false);
-  const [loadingProfile, setLoadingProfile] = useState<boolean>(true);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -54,7 +55,6 @@ const AdvisorBanner: React.FC = () => {
       setLoadingProfile(false);
     } catch (error) {
       console.error('Error loading profile picture:', error);
-      setProfilePictureUrl(null);
       setLoadingProfile(false);
     }
   };
@@ -63,13 +63,11 @@ const AdvisorBanner: React.FC = () => {
     const file = event.target.files && event.target.files[0];
     if (file) {
       try {
+        setLoadingProfile(true);
         const uid = auth.currentUser?.uid;
         if (!uid) {
-          console.error('User not authenticated');
-          return;
+          throw new Error('User not authenticated');
         }
-
-        setLoadingProfile(true);
 
         const storageRefPath = `profilePictures/${uid}.png`;
         const storageReference = storageRef(storage, storageRefPath);
@@ -159,9 +157,11 @@ const AdvisorBanner: React.FC = () => {
       {showValuePropPopup && (
         <ValuePropPopup onClose={handleCloseValuePropPopup} valueProp="Load value">
           <ValueProp
-            userId={auth.currentUser?.uid || ''}
+            uid={auth.currentUser?.uid || ''} // Use 'uid' instead of 'userId'
+            initialValue="Default Value"
             onValuePropChange={(newValueProp) => {
               // Handle changes to the value proposition here if needed
+              saveValuePropToDatabase(auth.currentUser?.uid || '', newValueProp); // Save value proposition to database
             }}
           />
         </ValuePropPopup>

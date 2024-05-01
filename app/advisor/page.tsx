@@ -7,10 +7,11 @@ import ParticipantTable from '@/components/advisor/tables/ParticipantTable';
 import ClientTable from '@/components/advisor/tables/ClientTable';
 import ValueProp from '@/components/advisor/value/ValueProp';
 import Campaigns from '@/components/campaigns/Campaigns';
-import PlanHealth from '@/components/health/PlanHealth'; // Import PlanHealth component
+import PlanHealth from '@/components/health/PlanHealth';
 import { Plan, Client } from '@/types/PlanTypes';
 import { Participant } from '@/types/ParticipantTypes';
 import { useAuth } from '@/components/context/authContext';
+import { getValuePropFromDatabase, saveValuePropToDatabase } from '@/utilities/firebaseClient'; // Import Firebase functions
 
 interface NavigationItem {
   id: number;
@@ -31,15 +32,16 @@ const Page: React.FC = () => {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
-  const [isHealthModalOpen, setHealthModalOpen] = useState(false); // State for health modal
+  const [isHealthModalOpen, setHealthModalOpen] = useState(false);
+  const [initialValue, setInitialValue] = useState<string>(''); // State for initial value
 
-  const [userData, setUser] = useAuth(); // Retrieve user data from authentication context
-  const userUid: string = userData?.uid || ''; // Obtain user UID from user data
+  const [userData, loadingAuth] = useAuth();
+  const userUid: string = userData?.uid || '';
 
   useEffect(() => {
     const fetchParticipants = async () => {
       try {
-        const response = await fetch('/api/participants'); // Fetch all participants
+        const response = await fetch('/api/participants');
         if (!response.ok) {
           throw new Error('Failed to fetch participants');
         }
@@ -52,7 +54,7 @@ const Page: React.FC = () => {
 
     const fetchPlans = async () => {
       try {
-        const response = await fetch('/api/plans'); // Fetch plans endpoint
+        const response = await fetch('/api/plans');
         if (!response.ok) {
           throw new Error('Failed to fetch plans');
         }
@@ -63,9 +65,19 @@ const Page: React.FC = () => {
       }
     };
 
+    const fetchInitialValue = async () => {
+      try {
+        const valueFromDatabase = await getValuePropFromDatabase(userUid);
+        setInitialValue(valueFromDatabase || ''); // Set initial value or default to empty string
+      } catch (error) {
+        console.error('Error fetching initial value:', error);
+      }
+    };
+
     fetchParticipants();
     fetchPlans();
-  }, []);
+    fetchInitialValue(); // Fetch initial value for ValueProp component
+  }, [userUid]);
 
   const handleNavigationItemClick = (item: NavigationItem) => {
     setSelectedNavItem(item);
@@ -76,17 +88,24 @@ const Page: React.FC = () => {
   const handlePlanSelect = (plan: Plan) => {
     setSelectedPlan(plan);
     setSelectedParticipant(null);
-    // Participants for the selected plan are already fetched on page load
   };
 
   const handleParticipantSelect = (participant: Participant) => {
     setSelectedParticipant(participant);
-    // Handle participant selection logic here
   };
 
   const handleHealthClick = (plan: Plan) => {
-    setSelectedPlan(plan); // Set the selected plan
-    setHealthModalOpen(true); // Open the PlanHealth modal
+    setSelectedPlan(plan);
+    setHealthModalOpen(true);
+  };
+
+  const handleValuePropChange = async (newValueProp: string) => {
+    try {
+      await saveValuePropToDatabase(userUid, newValueProp);
+      console.log('ValueProp saved successfully:', newValueProp);
+    } catch (error) {
+      console.error('Error saving ValueProp:', error);
+    }
   };
 
   const renderContent = () => {
@@ -111,14 +130,16 @@ const Page: React.FC = () => {
         );
       case 'Value Proposition':
         return (
-            <ValueProp
-              userId={userUid}
-              onValuePropChange={(newValueProp: string) => console.log('ValueProp changed:', newValueProp)}
-            />
+          <ValueProp
+            uid={userUid} // Pass userUid directly as uid
+            onValuePropChange={handleValuePropChange}
+            initialValue={initialValue} // Pass the fetched initial value to ValueProp
+          />
         );
       case 'Plan Campaigns':
-        return <Campaigns selectedClient={selectedParticipant} />;
-      case 'Coming Soon...':
+        return (
+          <Campaigns selectedClient={selectedParticipant} uid={userUid} />
+        );
       default:
         return null;
     }

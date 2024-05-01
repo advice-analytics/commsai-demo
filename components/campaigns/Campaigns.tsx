@@ -1,34 +1,37 @@
-'use client'
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Campaign } from '@/types/CampaignTypes';
 import { saveCampaignToDatabase, deleteCampaignFromDatabase, getCampaignsForUser } from '@/utilities/firebaseClient';
 import { generateCampaignPrompt } from '@/utilities/promptGenAI';
 import { useAuth } from '../context/authContext';
-import { Participant } from '@/types/ParticipantTypes';
+import { Participant, ParticipantWithScores } from '@/types/ParticipantTypes';
 
 interface CampaignsProps {
+  uid: string; // Change userId to uid
   selectedClient: Participant | null;
 }
 
-const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
+const Campaigns: React.FC<CampaignsProps> = ({ selectedClient, uid }) => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [newCampaignName, setNewCampaignName] = useState('');
-  const [newCampaignType, setNewCampaignType] = useState<string>('558'); // Initialize with '558' as the only selectable option
-  const [newCampaignAgeGroup, setNewCampaignAgeGroup] = useState<string>('');
+  const [newCampaignName, setNewCampaignName] = useState<string>('');
+  const [selectedPlan, setSelectedPlan] = useState<string>('558'); // Initialize with '558' as the preselected plan
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState<string>(''); // State for selected age group
+  const [selectedParticipant, setSelectedParticipant] = useState<string>(''); // State for selected participant
   const [selectedScenario, setSelectedScenario] = useState<string>('');
   const [messageContent, setMessageContent] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
-  const [userData, setUser] = useAuth();
-  const userUid: string = userData?.uid || '';
+
+  const [userData, loadingAuth] = useAuth();
+  // Extract uid from userData instead of userId
+  const userId = userData?.uid || '';
 
   const [participants, setParticipants] = useState<Participant[]>([]);
-  const [participantOffset, setParticipantOffset] = useState<number>(0); // Offset for batch loading
-  const batchSize = 10; // Number of participants to load per batch
+  const [participantOffset, setParticipantOffset] = useState<number>(0);
 
-  const participantScenarios = [
+  const participantScenarios: string[] = [
     'Not contributing to their plan, but eligible',
     'Contributing to their plan, but less than IRS limits',
     'Contributing to their plan, but less than "catch-up" limits',
@@ -40,103 +43,150 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
     'Opportunity to save more',
   ];
 
+  // Age group options
+  const ageGroupOptions: { value: string; label: string }[] = [
+    { value: '25under', label: '25 and under' },
+    { value: '25-35', label: '25 - 35' },
+    { value: '35-45', label: '35 - 45' },
+    { value: '45-55', label: '45 - 55' },
+    { value: '55-65', label: '55 - 65' },
+    { value: '65plus', label: '65 and above' },
+  ];
+
+  const clearInputFields = () => {
+    setNewCampaignName('');
+    setSelectedAgeGroup('');
+    setSelectedParticipant('');
+    setSelectedScenario('');
+    setMessageContent('');
+    setError('');
+  };
+
+  type Scores = {
+    [key: string]: number;
+  };
+
+  // Function to calculate the highest score from a participant's scores
+  const getHighestScore = (participant: ParticipantWithScores): number => {
+    const scores: Scores = {
+      retirement: participant.retirement,
+      financial: participant.financial,
+      tax: participant.tax,
+      investment: participant.investment,
+      estate: participant.estate,
+      adviceScore: Number(participant.adviceScore) || 0,
+    };
+
+    let highestScore = 0;
+    for (const key in scores) {
+      if (scores.hasOwnProperty(key) && typeof scores[key] === 'number') {
+        if (scores[key] > highestScore) {
+          highestScore = scores[key];
+        }
+      }
+    }
+    return highestScore;
+  };
+
   useEffect(() => {
-    const loadUserCampaigns = async () => {
+    const loadUserCampaigns = async (): Promise<void> => {
       try {
         setLoading(true);
-
-        const userCampaigns = await getCampaignsForUser(userUid);
+        const userCampaigns: Campaign[] = await getCampaignsForUser(uid);
         setCampaigns(userCampaigns);
-
-        setLoading(false);
       } catch (error) {
         console.error('Error loading campaigns:', error);
         setError('Failed to load campaigns. Please try again.');
+      } finally {
         setLoading(false);
       }
     };
 
-    loadUserCampaigns();
-  }, [userUid]);
+    if (uid) {
+      loadUserCampaigns();
+    }
+  }, [uid]);
 
   useEffect(() => {
     const loadParticipants = async () => {
       try {
-        setLoading(true);
-
-        // Fetch participants with batch loading
-        const response = await fetch(`/api/participants?offset=${participantOffset}&limit=${batchSize}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch participants');
+        const response = await fetch(`/api/participants?plan=${selectedPlan}&offset=${participantOffset}`);
+        if (response.ok) {
+          const loadedParticipants: Participant[] = await response.json();
+          setParticipants((prevParticipants) => [...prevParticipants, ...loadedParticipants]);
+        } else {
+          throw new Error('Failed to load participants');
         }
-        const participantsData = await response.json();
-        setParticipants((prevParticipants) => [...prevParticipants, ...participantsData]);
-
-        setLoading(false);
       } catch (error) {
         console.error('Error loading participants:', error);
-        setError('Failed to load participants. Please try again.');
-        setLoading(false);
       }
     };
 
-    if (newCampaignType === '558' && participants.length === 0) {
-      // Load participants if '558' plan is selected and participants are not yet loaded
+    if (selectedPlan) {
+      setParticipants([]);
+      setParticipantOffset(0);
       loadParticipants();
     }
-  }, [newCampaignType, participantOffset]); // Trigger when newCampaignType changes or participantOffset changes
+  }, [selectedPlan, participantOffset]);
 
-  const handleCreateCampaign = async () => {
-    if (!newCampaignName || !newCampaignAgeGroup || !selectedScenario || !messageContent) {
-      setError('Please fill out all fields.');
-      return;
-    }
-
-    setLoading(true);
-
+  const createCampaign = async (uid: string, campaignData: any): Promise<Campaign[]> => {
     try {
-      const planName = '558'; // Set plan name to '558' since it's fixed
-      const ageGroup = newCampaignAgeGroup;
-
-      const newCampaign: Campaign = {
-        id: String(Math.random()),
-        name: newCampaignName,
-        type: planName,
-        ageGroup: ageGroup,
-        prompt: '',
-        userId: userUid,
-        plan: '', // Set plan data as needed
-        planName: planName,
-        participant: null, // Set participant data as needed
-      };
-
-      const campaignPrompt: string = await generateCampaignPrompt(
-        newCampaign.name,
-        newCampaign.type,
+      const campaignDataWithPrompt = { ...campaignData };
+      const campaignPrompt = await generateCampaignPrompt(
+        campaignData.name,
+        campaignData.type,
         participantScenarios,
-        newCampaign.ageGroup,
-        userUid
+        campaignData.ageGroup,
+        uid
       );
+  
+      campaignDataWithPrompt.prompt = campaignPrompt;
+  
+      await saveCampaignToDatabase(uid, campaignDataWithPrompt);
+  
+      const updatedCampaigns = await getCampaignsForUser(uid);
+      return updatedCampaigns;
+    } catch (error) {
+      console.error('Error creating campaign:', error);
+      throw error;
+    }
+  };
 
-      newCampaign.prompt = campaignPrompt;
 
-      await saveCampaignToDatabase(userUid, newCampaign);
-
-      setCampaigns([...campaigns, newCampaign]);
+  const handleCreateCampaign = async (): Promise<void> => {
+    try {
+      if (!newCampaignName || !selectedAgeGroup || !selectedScenario || !messageContent) {
+        setError('Please fill out all fields.');
+        return;
+      }
+  
+      setLoading(true);
+  
+      const campaignData = {
+        name: newCampaignName,
+        type: selectedPlan,
+        ageGroup: selectedAgeGroup,
+        prompt: '',
+        participant: selectedClient || null,
+      };
+  
+      const updatedCampaigns = await createCampaign(uid, campaignData);
+  
+      setCampaigns(updatedCampaigns);
       clearInputFields();
-      setLoading(false);
+      alert('Campaign created successfully!');
     } catch (error) {
       console.error('Error creating campaign:', error);
       setError('Failed to create campaign. Please try again.');
+    } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteCampaign = async (campaignId: string) => {
     try {
-      await deleteCampaignFromDatabase(userUid, campaignId);
-
-      const updatedCampaigns = campaigns.filter((campaign) => campaign.id !== campaignId);
+      await deleteCampaignFromDatabase(uid, campaignId);
+      const updatedCampaigns: Campaign[] = campaigns.filter((campaign) => campaign.id !== campaignId);
       setCampaigns(updatedCampaigns);
     } catch (error) {
       console.error('Error deleting campaign:', error);
@@ -144,8 +194,9 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
     }
   };
 
+
   const handleEditPrompt = (campaignId: string, updatedPrompt: string) => {
-    const updatedCampaigns = campaigns.map((campaign) =>
+    const updatedCampaigns: Campaign[] = campaigns.map((campaign) =>
       campaign.id === campaignId ? { ...campaign, prompt: updatedPrompt } : campaign
     );
     setCampaigns(updatedCampaigns);
@@ -155,9 +206,9 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
     try {
       setLoading(true);
 
-      const campaignToUpdate = campaigns.find((campaign) => campaign.id === campaignId);
+      const campaignToUpdate: Campaign | undefined = campaigns.find((campaign) => campaign.id === campaignId);
       if (campaignToUpdate) {
-        await saveCampaignToDatabase(userUid, campaignToUpdate);
+        await saveCampaignToDatabase(uid || '', campaignToUpdate);
         setLoading(false);
         alert('Campaign message updated successfully!');
       }
@@ -166,14 +217,6 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
       setError('Failed to update campaign. Please try again.');
       setLoading(false);
     }
-  };
-
-  const clearInputFields = () => {
-    setNewCampaignName('');
-    setNewCampaignAgeGroup('');
-    setSelectedScenario('');
-    setMessageContent('');
-    setError('');
   };
 
 
@@ -195,13 +238,13 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
           />
         </div>
         <div>
-          <label htmlFor="campaignType" className="block text-sm font-medium text-gray-600">
+          <label htmlFor="selectedPlan" className="block text-sm font-medium text-gray-600">
             Plan
           </label>
           <select
-            id="campaignType"
-            value={newCampaignType}
-            onChange={(e) => setNewCampaignType(e.target.value)}
+            id="selectedPlan"
+            value={selectedPlan}
+            onChange={(e) => setSelectedPlan(e.target.value)}
             className="input-field shadow-md px-4 py-3 rounded-lg w-full"
             disabled={true} // Disable the dropdown after selecting the '558' plan
           >
@@ -210,20 +253,39 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
         </div>
         <div>
           <label htmlFor="ageGroup" className="block text-sm font-medium text-gray-600">
-            Participant
+            Age Group
           </label>
           <select
             id="ageGroup"
-            value={newCampaignAgeGroup}
-            onChange={(e) => setNewCampaignAgeGroup(e.target.value)}
+            value={selectedAgeGroup}
+            onChange={(e) => setSelectedAgeGroup(e.target.value)}
+            className="input-field shadow-md px-4 py-3 rounded-lg w-full"
+          >
+            <option value="">Select an age group</option>
+            {ageGroupOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+          <div>
+          <label htmlFor="participants" className="block text-sm font-medium text-gray-600">Select a participant</label>
+          <select
+            id="participants"
+            value={selectedParticipant}
+            onChange={(e) => setSelectedParticipant(e.target.value)}
             className="input-field shadow-md px-4 py-3 rounded-lg w-full"
           >
             <option value="">Select a participant</option>
-            {participants.map((participant) => (
-              <option key={participant.id} value={participant.id}>
-                ID {participant.id}, Balance {participant.balance}, Advice Score {participant.adviceScore}, Plan 558
-              </option>
-            ))}
+            {participants.map((participant) => {
+              const highestScore = getHighestScore(participant);
+              return (
+                <option key={participant.id} value={participant.id}>
+                  ID: {participant.id}, Age: {participant.age} - Highest Score: {highestScore} - Plan 558
+                </option>
+              );
+            })}
           </select>
         </div>
         <div>
@@ -274,7 +336,7 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
             {/* Display campaign details */}
             <h3 className="text-lg font-semibold mb-2">{campaign.name}</h3>
             <p>Plan: {campaign.type}</p>
-            <p>Participant: {campaign.ageGroup}</p>
+            <p>Age Group: {campaign.ageGroup}</p>
             {/* Editable prompt */}
             <div className="my-4">
               <strong>Prompt:</strong>
@@ -287,12 +349,12 @@ const Campaigns: React.FC<CampaignsProps> = ({ selectedClient }) => {
               />
 
               <div className="flex justify-center mt-4">
-              <button
-                onClick={() => handleSavePrompt(campaign.id)}
-                className="btn-primary bg-green-500 text-white mt-2 rounded-md py-2 px-4"
-              >
-                Save
-              </button>
+                <button
+                  onClick={() => handleSavePrompt(campaign.id)}
+                  className="btn-primary bg-green-500 text-white mt-2 rounded-md py-2 px-4"
+                >
+                  Save
+                </button>
               </div>
             </div>
             {/* Delete button */}

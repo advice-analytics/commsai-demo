@@ -76,13 +76,19 @@ const signInUserWithEmailAndPassword = async (email: string, password: string): 
 };
 
 // Function to send sign-in link via email
-const sendSignInEmailLink = (email: string) => {
+const sendSignInEmailLink = async (email: string) => {
   const actionCodeSettings = {
     url: `${window.location.origin}/advisor?email=${encodeURIComponent(email)}`, // Include email parameter in URL
     handleCodeInApp: true,
   };
 
-  return sendSignInLinkToEmail(auth, email, actionCodeSettings);
+  try {
+    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+    console.log('Passwordless sign-in link sent to email:', email);
+  } catch (error: any) {
+    console.error('Error sending passwordless sign-in link:', error.message);
+    throw error;
+  }
 };
 
 // Function to complete sign-in with email link
@@ -92,7 +98,7 @@ const completeSignInWithEmailLink = async (email: string, url: string) => {
       const result = await signInWithEmailLink(auth, email, url);
       return result;
     } catch (error: any) {
-      console.error('Error signing in with email link:', error.message);
+      console.error('Error completing sign-in with email link:', error.message);
       throw error;
     }
   } else {
@@ -100,18 +106,12 @@ const completeSignInWithEmailLink = async (email: string, url: string) => {
   }
 };
 
+// Function to save value proposition to Firebase Realtime Database
 const saveValuePropToDatabase = async (uid: string, valueProp: string): Promise<void> => {
   try {
     const valuePropRef = dbRef(database, `users/${uid}/valueProp`);
-    const dataSnapshot = await get(valuePropRef);
-
-    if (dataSnapshot.exists()) {
-      // Value proposition already exists for the user, update it
-      await set(valuePropRef, { value: valueProp });
-    } else {
-      // Value proposition does not exist, create a new one
-      await set(valuePropRef, { value: valueProp });
-    }
+    await set(valuePropRef, { value: valueProp });
+    console.log('Value proposition saved successfully.');
   } catch (error: any) {
     console.error('Error saving value proposition to database:', error.message);
     throw error;
@@ -136,8 +136,9 @@ const getValuePropFromDatabase = async (uid: string): Promise<string> => {
 // Function to delete campaign data from Firebase Realtime Database
 const deleteCampaignFromDatabase = async (uid: string, campaignId: string): Promise<void> => {
   try {
-    const campaignRef = dbRef(database, `users/${uid}/campaigns/`);
+    const campaignRef = dbRef(database, `users/${uid}/campaigns/${campaignId}`);
     await remove(campaignRef); // Remove the campaign node from the database
+    console.log('Campaign data deleted successfully.');
   } catch (error: any) {
     console.error('Error deleting campaign data from database:', error.message);
     throw error;
@@ -148,11 +149,15 @@ const deleteCampaignFromDatabase = async (uid: string, campaignId: string): Prom
 const saveCampaignToDatabase = async (uid: string, campaignData: any): Promise<void> => {
   try {
     const campaignsRef = dbRef(database, `users/${uid}/campaigns`);
-    const newCampaignRef = push(campaignsRef); // Create a new child node
-    await set(newCampaignRef, campaignData); // Save campaign data under the new child node
+
+    // Save campaign data under a new push ID
+    const newCampaignRef = push(campaignsRef);
+    await set(newCampaignRef, campaignData);
+
+    console.log(`Campaign data saved successfully for uid ${uid}.`);
   } catch (error: any) {
-    console.error('Error saving campaign data to database:', error.message);
-    throw error;
+    console.error(`Error saving campaign data to database for uid ${uid}:`, error.message);
+    throw error; // Rethrow the error to handle it at the caller's level
   }
 };
 
@@ -165,7 +170,7 @@ const getCampaignsForUser = async (uid: string): Promise<any[]> => {
 
     dataSnapshot.forEach((childSnapshot) => {
       const campaignData = childSnapshot.val();
-      campaigns.push(campaignData);
+      campaigns.push({ id: childSnapshot.key, ...campaignData });
     });
 
     return campaigns;
@@ -174,7 +179,6 @@ const getCampaignsForUser = async (uid: string): Promise<any[]> => {
     throw error;
   }
 };
-
 
 // Function to upload user profile picture with dynamic file extension
 const uploadProfilePicture = async (uid: string, file: File): Promise<string> => {

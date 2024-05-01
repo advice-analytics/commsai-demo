@@ -62,8 +62,7 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({
 
   const getTopStressor = (participant: Participant): string => {
     const { retirement, financial, tax, investment, estate } = participant;
-  
-    // Create an array of stressors with their corresponding scores
+
     const stressors = [
       { name: 'Retirement', score: retirement.toString() },
       { name: 'Financial', score: financial.toString() },
@@ -71,28 +70,26 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({
       { name: 'Investment', score: investment.toString() },
       { name: 'Estate', score: estate.toString() },
     ];
-  
-    // Find the stressor with the highest score
+
     let topStressor = '';
-    let highestScore = -1; // Initialize with a value lower than any possible score
-  
+    let highestScore = -1;
+
     stressors.forEach((stressor) => {
       const { name, score } = stressor;
-  
-      // Convert score to a number and check if it's valid
+
       const numericScore = parseFloat(score);
-  
+
       if (!isNaN(numericScore) && numericScore > highestScore) {
         highestScore = numericScore;
         topStressor = name;
       }
     });
-  
+
     return topStressor;
   };
-  
+
   const checkScreenWidth = () => {
-    setIsMobileView(window.innerWidth < 640);
+    setIsMobileView(window.innerWidth < 640); // Adjust breakpoint as needed
   };
 
   useEffect(() => {
@@ -116,28 +113,46 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({
           <thead>
             <tr style={{ backgroundColor: '#144e74', color: 'white', textAlign: 'center' }}>
               <th style={{ padding: '10px', border: '1px solid #ccc', whiteSpace: 'nowrap' }}>Participant</th>
-              <th style={{ padding: '10px', border: '1px solid #ccc', whiteSpace: 'nowrap' }}>Advice Score</th>
-              <th style={{ padding: '10px', border: '1px solid #ccc', whiteSpace: 'nowrap' }}>Top Stressor</th>
+              {!isMobileView && <th style={{ padding: '10px', border: '1px solid #ccc', whiteSpace: 'nowrap' }}>Advice Score</th>}
+              <th style={{ padding: '10px', border: '1px solid #ccc', whiteSpace: 'nowrap' }}>Stressor</th>
             </tr>
           </thead>
           <tbody>
             {filteredParticipants.slice(0, displayCount).map((participant) => (
-              <tr key={participant.id} onClick={() => handleParticipantSelect(participant)} style={{ borderBottom: '1px solid #ccc', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+              <tr
+                key={participant.id}
+                onClick={() => handleParticipantSelect(participant)}
+                style={{ borderBottom: '1px solid #ccc', cursor: 'pointer', whiteSpace: 'nowrap' }}
+              >
                 <td style={{ padding: '12px', textAlign: 'center' }}>{participant.id}</td>
-                <td style={{ padding: '12px', textAlign: 'center' }}>{participant.adviceScore}</td>
-                <td style={{ padding: '12px', textAlign: 'center' }}>{getTopStressor(participant)}</td>
+                {!isMobileView && <td style={{ padding: '12px', textAlign: 'center' }}>{participant.adviceScore}</td>}
+                <td style={{ padding: '12px', textAlign: 'center', fontSize: isMobileView ? '14px' : 'inherit' }}>
+                  {getTopStressor(participant)}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
         {displayCount < filteredParticipants.length && (
           <div style={{ textAlign: 'center', marginTop: '10px', marginBottom: '10px' }}>
-            <button onClick={handleLoadMore} style={{ padding: '10px 20px', fontSize: '16px', backgroundColor: '#144e74', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Load More</button>
+            <button
+              onClick={handleLoadMore}
+              style={{
+                padding: '10px 20px',
+                fontSize: '16px',
+                backgroundColor: '#144e74',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+              }}
+            >
+              Load More
+            </button>
           </div>
         )}
       </div>
 
-      {/* Render ClientTablePopup if showClientTablePopup is true */}
       {showClientTablePopup && selectedParticipant && (
         <ClientTablePopup
           showChartModal={showClientTablePopup}
@@ -145,7 +160,7 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({
           participant={selectedParticipant}
           onClose={() => {
             setShowClientTablePopup(false);
-            setSelectedParticipant(null); // Reset selected participant when closing the popup
+            setSelectedParticipant(null);
           }}
         />
       )}
