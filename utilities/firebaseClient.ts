@@ -29,6 +29,8 @@ import {
   getMetadata,
 } from 'firebase/storage';
 
+import { Campaign } from '@/types/CampaignTypes';
+
 // Firebase configuration object
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -133,12 +135,18 @@ const getValuePropFromDatabase = async (uid: string): Promise<string> => {
   }
 };
 
-// Function to delete campaign data from Firebase Realtime Database
-const deleteCampaignFromDatabase = async (uid: string, campaignId: string): Promise<void> => {
+const deleteCampaignFromDatabase = async (campaignId: string): Promise<void> => {
   try {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error('User is not authenticated.');
+    }
+
+    const uid = user.uid;
     const campaignRef = dbRef(database, `users/${uid}/campaigns/${campaignId}`);
-    await remove(campaignRef); // Remove the campaign node from the database
-    console.log('Campaign data deleted successfully.');
+    await remove(campaignRef);
+
+    console.log(`Campaign data with ID ${campaignId} deleted successfully for uid ${uid}.`);
   } catch (error: any) {
     console.error('Error deleting campaign data from database:', error.message);
     throw error;
@@ -146,36 +154,52 @@ const deleteCampaignFromDatabase = async (uid: string, campaignId: string): Prom
 };
 
 // Function to save campaign data to Firebase Realtime Database
-const saveCampaignToDatabase = async (uid: string, campaignData: any): Promise<void> => {
+const saveCampaignToDatabase = async (uid: string, campaign: Campaign): Promise<void> => {
   try {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error('User is not authenticated.');
+    }
+
+    const uid = user.uid;
     const campaignsRef = dbRef(database, `users/${uid}/campaigns`);
 
-    // Save campaign data under a new push ID
+    // Save campaign data under a new push ID (Firebase generates unique ID)
     const newCampaignRef = push(campaignsRef);
-    await set(newCampaignRef, campaignData);
+    await set(newCampaignRef, campaign);
 
     console.log(`Campaign data saved successfully for uid ${uid}.`);
   } catch (error: any) {
-    console.error(`Error saving campaign data to database for uid ${uid}:`, error.message);
-    throw error; // Rethrow the error to handle it at the caller's level
+    console.error('Error saving campaign data to database:', error.message);
+    throw error;
   }
 };
 
 // Function to retrieve campaigns for a specific user from Firebase Realtime Database
-const getCampaignsForUser = async (uid: string): Promise<any[]> => {
+const getCampaignsForUser = async (uid: string): Promise<Campaign[]> => {
   try {
     const campaignsRef = dbRef(database, `users/${uid}/campaigns`);
     const dataSnapshot: DataSnapshot = await get(campaignsRef);
-    const campaigns: any[] = [];
 
+    const campaigns: Campaign[] = [];
     dataSnapshot.forEach((childSnapshot) => {
       const campaignData = childSnapshot.val();
-      campaigns.push({ id: childSnapshot.key, ...campaignData });
+      const campaign: Campaign = {
+        id: childSnapshot.key || '', // Use Firebase-generated key as campaign ID
+        name: campaignData.name || '',
+        type: campaignData.type || '',
+        ageGroup: campaignData.ageGroup || '',
+        plan: campaignData.plan || '',
+        planName: campaignData.planName || '',
+        prompt: campaignData.prompt || '',
+        participant: campaignData.participant || null,
+      };
+      campaigns.push(campaign);
     });
 
     return campaigns;
-  } catch (error: any) {
-    console.error('Error retrieving campaigns from database:', error.message);
+  } catch (error) {
+    console.error('Error retrieving campaigns from database:', error);
     throw error;
   }
 };

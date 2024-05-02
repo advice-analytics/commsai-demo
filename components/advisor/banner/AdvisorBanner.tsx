@@ -10,11 +10,11 @@ import ValueProp from '../value/ValueProp';
 import { saveValuePropToDatabase, getValuePropFromDatabase } from '@/utilities/firebaseClient'; // Import Firebase functions
 
 const serviceCategories = [
-  { name: '| Retirement |', icon: 'retirement-light.svg' },
-  { name: '| Financial Plans |', icon: 'financial-light.svg' },
-  { name: '| Tax Plans |', icon: 'money-light.svg' },
-  { name: '| Investment |', icon: 'investement-light.svg' },
-  { name: '| Estate Plans | ', icon: 'estate-light.svg' },
+  { name: 'Retirement', icon: 'retirement-light.svg' },
+  { name: 'Financial Plans', icon: 'financial-light.svg' },
+  { name: 'Tax Plans', icon: 'money-light.svg' },
+  { name: 'Investment', icon: 'investement-light.svg' },
+  { name: 'Estate Plans', icon: 'estate-light.svg' },
 ];
 
 const storage = getStorage();
