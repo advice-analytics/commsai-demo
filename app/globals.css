@@ -77,6 +77,7 @@ h3 {
 
 /* Footer */
 #App\:Footer {
+  position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
@@ -154,6 +155,8 @@ h3 {
   padding: 20px;
   color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin: 0 auto; /* Horizontally center the banner */
+
 }
 
 .profile-section {
@@ -161,6 +164,7 @@ h3 {
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  
 }
 
 .profile-picture img {
@@ -263,12 +267,14 @@ h3 {
   .nav-container ul li:nth-child(1),
   .nav-container ul li:nth-child(2) {
     display: block;
-    margin-right: 20px; /* Add spacing between items */
+    margin: 0 auto;
+    margin-top: 20px; /* Horizontally center the banner */
+
   }
 
   .content-container {
     padding: 20px;
-    margin-top: 350px; /* Maintain padding for tablets */
+    margin-top: 300px; /* Maintain padding for tablets */
   }
 
   .nav-container ul li {
@@ -276,9 +282,18 @@ h3 {
   }
 
   .advisor-banner {
-    width: 100%;
-    padding: 10px;
+    display: flex;
+    width: 50%;
+    flex-direction: column;
+    align-items: center;
+    background-color: #144e74;
+    border-radius: 5px;
+    padding: 5px;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    margin: 0 auto; /* Horizontally center the banner */
   }
+  
 
   .advisor-info {
     display: flex;
@@ -291,30 +306,28 @@ h3 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
+    width: 85%;
   }
 
   .gear-icon {
     cursor: pointer;
-    height: 50px; /* Set desired height */
-    width: 50px; /* Set desired width */
-    margin-bottom: 50px;
+    margin-bottom: 70px;
   }
   
   .gear-icon img {
     cursor: pointer;
     height: auto;
-    width: auto;
+    width: 20px;
   }
   
   .profile-picture img {
-    width: 100px;
-    height: 100px;
+    width: 100%;
+    height: auto;
     border-radius: 50%;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add shadow for a raised effect */
   }
   .username {
-    font-size: 16px;
+    font-size: 12px;
     margin-top: 10px;
     color: #f8c239;
     overflow: hidden;
@@ -323,7 +336,7 @@ h3 {
   }
   
   .commsid {
-    font-size: 16px;
+    font-size: 12px;
     color: #fff;
     margin-top: 20px;
     overflow: hidden;
@@ -332,12 +345,12 @@ h3 {
   }
   
   .valuePropId {
-    font-size: 16px;
+    font-size: 12px;
     color: #32d296;
   }
   
   .value-prop-link {
-    font-size: 16px;
+    font-size: 12px;
     color: white;
     margin-top: 20px;
   }
@@ -345,11 +358,6 @@ h3 {
 }
 
 @media (max-width: 480px) {
-  .main-container {
-    flex-direction: column;
-    align-items: center;
-  }
-
   .nav-container ul {
     list-style: none;
     padding: 0;
@@ -357,81 +365,194 @@ h3 {
     justify-content: space-between;
   }
 
+  /* Display only the first two list items */
   .nav-container ul li {
     display: none;
   }
-
-  /* Display only the first two list items */
-  .nav-container ul li:nth-child(1),
-  .nav-container ul li:nth-child(2) {
+  .nav-container ul li:nth-child(-n+2) {
     display: block;
-    margin-right: 10px; /* Add spacing between items */
-  }
-
-  .content-container {
-    padding: 20px; /* Maintain padding for mobile devices */
-    margin-top: 400px; /* Maintain padding for tablets */
-  }
-
-  .advisor-banner {
-    width: 100%;
-    padding: 10px;
+    margin: 0 auto; /* Horizontally center the banner */
+    /* Add spacing between items */
   }
 
   .advisor-info {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
+    align-items: flex-start; /* Adjust alignment for readability */
     font-size: 14px;
-    
   }
 
-  .profile-picture img {
-    margin-right: 0;
-    height: 100px;
-    width: 100px;
+  .content-container {
+    padding: 20px; /* Maintain padding for mobile devices */
+    margin-top: 350px; /* Adjust margin for better layout */
   }
 
   .gear-icon {
-    cursor: pointer;
-    height: 50px; /* Set desired height */
-    width: 50px; /* Set desired width */
-    margin-bottom: 50px;
-  }
-  
-  .gear-icon img {
-    cursor: pointer;
-    height: auto;
-    width: auto;
+    height: 40px; /* Adjust gear icon size for visibility */
+    width: 40px;
+    margin-bottom: 20px; /* Reduce margin for spacing */
   }
 
-  .username {
-    font-size: 12px;
-    margin-top: 10px;
-    color: #f8c239;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  
-  .commsid {
-    font-size: 12px;
-    color: #fff;
-    margin-top: 10px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  
-  .valuePropId {
-    font-size: 12px;
-    color: #32d296;
-  }
-  
+  .username,
+  .commsid,
+  .valuePropId,
   .value-prop-link {
-    font-size: 10px;
-    color: white;
+    font-size: 12px; /* Adjust font size for readability */
   }
 }
 
 
+@media (max-width: 430px) {
+  .advisor-banner {
+    width: 100%;
+    padding: 8px; /* Reduce padding for smaller screens */
+  }
+
+  .profile-picture img {
+    width: 100%; /* Adjust profile picture size */
+    height: auto;
+    margin-bottom: 3px; /* Maintain spacing */
+  }
+
+  .gear-icon {
+    height: 20px; /* Further reduce gear icon size */
+    width: 20px;
+    margin-bottom: 74px; /* Adjust margin for spacing */
+  }
+
+  .advisor-info {
+    font-size: 12px; /* Decrease font size for advisor info */
+    align-items: flex-end; 
+    margin-left: 65px;/* Center align for better layout */
+  }
+
+  .content-container {
+    padding: 20px; /* Maintain padding for mobile devices */
+    margin-top: 300px; /* Adjust margin for better layout */
+  }
+
+  .username,
+  .commsid,
+  .valuePropId,
+  .value-prop-link {
+    font-size: 10px; /* Further decrease font size for text */
+  }
+}
+
+@media (max-width: 375px) {
+
+  .nav-container ul {
+    display: flex;
+    align-items: center;
+    padding: 0;
+  }
+
+  .nav-container ul li {
+    display: block;
+    margin-bottom: 10px; /* Add spacing between list items */
+    text-align: center;
+     /* Center-align list items */
+  }
+
+  /* Display only the first two list items */
+  .nav-container ul li:nth-child(n+3) {
+    display: none;
+     /* Hide list items starting from the third one */
+  }
+  .advisor-banner {
+    width: 100%;
+    padding: 2px; /* Further reduce padding for smaller screens */
+    margin: 0 auto; /* Horizontally center the banner */
+
+  }
+
+  .profile-picture img {
+    width: 75%; /* Ensure profile picture fills its container */
+    height: auto;
+  }
+
+  .gear-icon {
+    height: 18px; /* Adjust gear icon size */
+    width: 18px;
+    margin-bottom: 74px; /* Adjust margin for spacing */
+  }
+
+  .advisor-info {
+    align-items: flex-end;
+    margin: 0 auto; 
+    margin-left: 20px;/* Horizontally center the banner */
+    /* Center align for better layout */
+  }
+
+  .username,
+  .commsid,
+  .valuePropId,
+  .value-prop-link {
+    font-size: 10px; /* Further decrease font size for text */
+  }
+
+  .content-container {
+    padding: 20px; /* Maintain padding for mobile devices */
+    margin-top: 325px; /* Adjust margin for better layout */
+  }
+  
+}
+
+@media (max-width: 360px) {
+
+  .nav-container ul {
+    display: flex;
+    align-items: center;
+    padding: 0;
+  }
+
+  .nav-container ul li {
+    display: block;
+    margin-bottom: 10px; /* Add spacing between list items */
+    text-align: center;
+     /* Center-align list items */
+  }
+
+  /* Display only the first two list items */
+  .nav-container ul li:nth-child(n+3) {
+    display: none;
+     /* Hide list items starting from the third one */
+  }
+  .advisor-banner {
+    width: 100%;
+    padding: 2px; /* Further reduce padding for smaller screens */
+    margin: 0 auto; /* Horizontally center the banner */
+
+  }
+
+  .profile-picture img {
+    width: 75%; /* Ensure profile picture fills its container */
+    height: auto;
+  }
+
+  .gear-icon {
+    height: 18px; /* Adjust gear icon size */
+    width: 18px;
+    margin-bottom: 74px; /* Adjust margin for spacing */
+  }
+
+  .advisor-info {
+    align-items: flex-end;
+    margin: 0 auto; 
+    margin-left: 20px;/* Horizontally center the banner */
+    /* Center align for better layout */
+  }
+
+  .username,
+  .commsid,
+  .valuePropId,
+  .value-prop-link {
+    font-size: 10px; /* Further decrease font size for text */
+  }
+
+  .content-container {
+    padding: 20px; /* Maintain padding for mobile devices */
+    margin-top: 350px; /* Adjust margin for better layout */
+  }
+  
+}

@@ -12,7 +12,7 @@ const Footer: React.FC = () => {
         <div className="flex items-center">
           <Link href="/docs">
             <NextImage
-              className="w-auto h-10 lg:w-auto lg:h-12"
+              className="w-auto h-5 lg:w-auto lg:h-12"
               src={LogoImage}
               alt=""
               width={300}

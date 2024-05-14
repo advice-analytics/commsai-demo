@@ -52,11 +52,13 @@ const ValuePropPopup: React.FC<ValuePropPopupProps> = ({ children, onClose, valu
         }
         .popup-content {
           background-color: #fff;
-          width: 80%;
-          max-width: 600px;
+          width: 90%;
+          max-width: 1000px;
           padding: 20px;
           border-radius: 8px;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          overflow-y: auto;
+          max-height: 70vh; 
         }
         .popup-header {
           display: flex;
@@ -79,6 +81,7 @@ const ValuePropPopup: React.FC<ValuePropPopupProps> = ({ children, onClose, valu
         }
         .popup-body {
           margin-bottom: 20px;
+          overflow: auto; /* Enable scrolling */
         }
       `}</style>
     </div>
