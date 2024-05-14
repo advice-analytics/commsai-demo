@@ -29,17 +29,9 @@ except FileNotFoundError:
 origins = [
     "http://localhost",
     "http://localhost:3000",
-    "https://demo.commsai.io",  # Update with your frontend URL
+    "https://demo.commsai.io/",  # Update with your frontend URL
     "https://demo-api.commsai.io/"  
 ]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["*"],
-)
 
 # Endpoint to retrieve all participants
 @app.get("/api/participants", response_model=List[dict])

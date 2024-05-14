@@ -4,22 +4,6 @@ const nextConfig = {
   images: {
     domains: ['firebasestorage.googleapis.com'], // Add Firebase Storage hostname here
   },
-  async headers() {
-    let allowOrigin = process.env.NEXT_PUBLIC_ALLOW_ORIGIN || "*"; // Default to "*" if NEXT_PUBLIC_ALLOW_ORIGIN is not defined
-
-    return [
-      {
-        // Set CORS headers for all API routes
-        source: "/api/:path*", // Match all API routes
-        headers: [
-          { key: "Access-Control-Allow-Credentials", value: "true" },
-          { key: "Access-Control-Allow-Origin", value: allowOrigin }, // Use the configured allowOrigin value
-          { key: "Access-Control-Allow-Methods", value: "GET,POST,PUT,PATCH,DELETE,OPTIONS" }, // Allow the listed HTTP methods
-          { key: "Access-Control-Allow-Headers", value: "*" }, // Allow all headers
-        ],
-      },
-    ];
-  },
   async rewrites() {
     return [
       {
