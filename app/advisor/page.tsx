@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
+import { signInUserWithEmailAndPassword } from '@/utilities/firebaseClient';
+import { useAuth } from '@/components/context/authContext';
 import AdvisorBanner from '@/components/advisor/banner/AdvisorBanner';
 import PlanTable from '@/components/advisor/tables/PlanTable';
 import ParticipantTable from '@/components/advisor/tables/ParticipantTable';
@@ -10,8 +12,7 @@ import Campaigns from '@/components/campaigns/Campaigns';
 import PlanHealth from '@/components/health/PlanHealth';
 import { Plan, Client } from '@/types/PlanTypes';
 import { Participant } from '@/types/ParticipantTypes';
-import { useAuth } from '@/components/context/authContext';
-import { getValuePropFromDatabase, saveValuePropToDatabase } from '@/utilities/firebaseClient'; // Import Firebase functions
+import { saveValuePropToDatabase } from '@/utilities/firebaseClient';
 
 interface NavigationItem {
   id: number;
@@ -33,51 +34,55 @@ const Page: React.FC = () => {
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [isHealthModalOpen, setHealthModalOpen] = useState(false);
-  const [initialValue, setInitialValue] = useState<string>(''); // State for initial value
+  const [initialValue, setInitialValue] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
 
   const [userData, loadingAuth] = useAuth();
   const userUid: string = userData?.uid || '';
 
   useEffect(() => {
-    const fetchParticipants = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/participants');
-        if (!response.ok) {
-          throw new Error('Failed to fetch participants');
-        }
-        const participantsData: Participant[] = await response.json();
-        setParticipants(participantsData);
-      } catch (error) {
-        console.error('Error fetching participants:', error);
-      }
-    };
+        const [plansResponse, participantsResponse] = await Promise.all([
+          fetch('/api/plans'),
+          fetch('/api/participants')
+        ]);
 
-    const fetchPlans = async () => {
-      try {
-        const response = await fetch('/api/plans');
-        if (!response.ok) {
-          throw new Error('Failed to fetch plans');
+        if (!plansResponse.ok || !participantsResponse.ok) {
+          throw new Error('Failed to fetch data');
         }
-        const plansData: Plan[] = await response.json();
+
+        const plansData: Plan[] = await plansResponse.json();
+        const participantsData: Participant[] = await participantsResponse.json();
+
         setPlans(plansData);
+        setParticipants(participantsData);
+        setLoading(false);
       } catch (error) {
-        console.error('Error fetching plans:', error);
+        console.error('Error fetching data:', error);
       }
     };
 
-    const fetchInitialValue = async () => {
+    const signInAndFetchData = async () => {
       try {
-        const valueFromDatabase = await getValuePropFromDatabase(userUid);
-        setInitialValue(valueFromDatabase || ''); // Set initial value or default to empty string
+        // Sign in the predefined user with provided credentials
+        await signInUserWithEmailAndPassword('askme@adviceanalytics.com', '');
+        console.log('User signed in successfully.');
+
+        // Fetch data after successful sign-in
+        fetchData();
       } catch (error) {
-        console.error('Error fetching initial value:', error);
+        console.error('Error signing in:', error);
+        setLoading(false); // Update loading state to false in case of error
       }
     };
 
-    fetchParticipants();
-    fetchPlans();
-    fetchInitialValue(); // Fetch initial value for ValueProp component
-  }, [userUid]);
+    if (!userData) {
+      signInAndFetchData(); // Sign in user and fetch data if not already authenticated
+    } else {
+      fetchData(); // Fetch data if user is already authenticated
+    }
+  }, [userData]); // Include userData in the dependency array to trigger effect when auth state changes
 
   const handleNavigationItemClick = (item: NavigationItem) => {
     setSelectedNavItem(item);
@@ -109,6 +114,10 @@ const Page: React.FC = () => {
   };
 
   const renderContent = () => {
+    if (loading) {
+      return <p>Loading Plan Data...</p>;
+    }
+
     switch (selectedNavItem.label) {
       case 'All Plans':
         return (
