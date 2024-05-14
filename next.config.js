@@ -1,31 +1,30 @@
-// next.config.js
-
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
     domains: ['firebasestorage.googleapis.com'], // Add Firebase Storage hostname here
   },
-  async rewrites() {
+  rewrites: async () => {
     return [
       {
-        source: "/api/:path*", // Rewrite API routes
+        source: "/api/:path*",
         destination:
           process.env.NODE_ENV === "development"
-            ? "http://127.0.0.1:8000/api/:path*" // Proxy to local development server
-            : "/api/:path*", // Direct to production API endpoint
+            ? "http://127.0.0.1:8000/api/:path*"
+            : "/api/",
       },
       {
         source: "/docs",
         destination:
           process.env.NODE_ENV === "development"
-            ? "http://127.0.0.1:8000/docs" // Proxy to local development server
-            : "/api/docs", // Direct to production API endpoint
+            ? "http://127.0.0.1:8000/docs"
+            : "/api/docs",
       },
       {
         source: "/openapi.json",
         destination:
           process.env.NODE_ENV === "development"
-            ? "http://127.0.0.1:8000/openapi.json" // Proxy to local development server
-            : "/api/openapi.json", // Direct to production API endpoint
+            ? "http://127.0.0.1:8000/openapi.json"
+            : "/api/openapi.json",
       },
     ];
   },
