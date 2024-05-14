@@ -29,8 +29,7 @@ except FileNotFoundError:
 origins = [
     "http://localhost",
     "http://localhost:3000",
-    "https://schwab.commsai.io",  # Update with your frontend URL
-    "https://*.dailyvest.com",
+    "https://demo.commsai.io",  # Update with your frontend URL
     "https://demo-api.commsai.io/"  
 ]
 
